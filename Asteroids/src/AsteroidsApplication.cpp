@@ -1,5 +1,6 @@
 #include "Asteroids/AsteroidsApplication.hpp"
 #include "Asteroids/DebugTextScroll.hpp"
+#include "Asteroids/Player.hpp"
 
 #include <Urho3D/Engine/DebugHud.h>
 #include <Urho3D/Input/Input.h>
@@ -70,6 +71,8 @@ void AsteroidsApplication::RegisterStuff()
     context_->RegisterSubsystem(new DebugTextScroll(context_));
     GetSubsystem<DebugTextScroll>()->SetTextCount(40);
 #endif
+
+    Player::RegisterObject(context_);
 }
 
 // ----------------------------------------------------------------------------

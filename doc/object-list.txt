@@ -1,0 +1,63 @@
+Models
+======
+
+- Player ship model
+  + Attachable phasers
+  + Attachable missile launcher
+  + Attachable mine deployer
+  + Attachable warp drive
+  + Attachable shield generator
+  + Attachable spread shot
+  + Upon death, ship will split up into fragments (probably best to do this
+    with separate models)
+  + Ship should have surfaces that can be tinted a certain color (see SC2
+    units) to distinguish between teams.
+
+- UFO1 model
+  + Large, clunky, can't aim well
+
+- UFO2 model
+  + Small, smart, predictive targeting, evasive manouvering
+
+- Asteroid models
+  + 4 different sizes
+
+- Phaser shot
+  + Short beam of light. Only emissive material, will use bloom shader.
+
+- Missile
+- Mine
+- Spread shot
+- Missile Power-up (collectable container)
+- Mine Power-up (collectable container)
+- Warp drive Power-up (collectable container)
+- Shield generator Power-up (collectable container)
+- Spread shot Power-up (collectable container)
+
+Worlds
+======
+
+- Planet 1
+  + Just a sphere, no obstacles
+
+- Planet 2
+  + Has some obstacles (in the form of mountains, trees, cities?)
+
+- Planet 3
+  + Maze-like planet with artificial walls that extend up into the atmosphere
+
+- Skybox of space?
+
+Effects
+=======
+
+These may or may not need 3D modeling:
+
+- Shield
+- Ship explosion (used for player and UFO deaths)
+- Phaser impact
+- Missile explosion
+- Missile trail
+- Mine explosion
+- Warp effect
+
