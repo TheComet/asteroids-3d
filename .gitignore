@@ -4,3 +4,6 @@
 # IDE files
 /*.kdev4
 
+# Temp files
+*.swp
+

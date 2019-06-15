@@ -20,11 +20,11 @@
         <action name="UseItem" button="3" />
     </device>
     <device name="keyboard">
-        <action name="Left" key="23" />
-        <action name="Right" key="i" />
-        <action name="Fire" key="o" />
-        <action name="Thrust" key="p" />
-        <action name="Warp" key="ü" />
-        <action name="UseItem" key="!" />
+        <action name="Left" key="117" />
+        <action name="Right" key="105" />
+        <action name="Fire" key="111" />
+        <action name="Thrust" key="112" />
+        <action name="Warp" key="108" />
+        <action name="UseItem" key="252" />
     </device>
 </devices>
