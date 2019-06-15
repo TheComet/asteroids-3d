@@ -26,8 +26,11 @@ class DebugTextScroll : public Urho3D::Object
 
 public:
     DebugTextScroll(Urho3D::Context* context);
+    static void RegisterSubsystem(Urho3D::Context* context);
+    static void RemoveSubsystem(Urho3D::Context* context);
 
     void SetTextCount(unsigned count);
+    void SetTimeout(float seconds);
     void Print(const Urho3D::String& str, const Urho3D::Color& color=Urho3D::Color::WHITE);
 
 private:
@@ -37,11 +40,12 @@ private:
     struct TextItem
     {
         Urho3D::SharedPtr<Urho3D::Text> text_;
-        float timeOut_;
+        float timeout_;
     };
 
     Urho3D::Vector<TextItem> items_;
     Urho3D::Vector<TextItem>::Iterator insertIt_;
+    float timeoutSetting_;
 };
 
 }

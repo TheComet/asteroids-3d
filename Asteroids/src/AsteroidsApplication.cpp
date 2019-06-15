@@ -1,5 +1,6 @@
 #include "Asteroids/AsteroidsApplication.hpp"
 #include "Asteroids/DebugTextScroll.hpp"
+#include "Asteroids/InputActionMapper.hpp"
 #include "Asteroids/Player.hpp"
 
 #include <Urho3D/Engine/DebugHud.h>
@@ -7,6 +8,7 @@
 #include <Urho3D/Input/InputEvents.h>
 #include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Graphics/Octree.h>
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/UI/UI.h>
 
@@ -55,23 +57,33 @@ void AsteroidsApplication::Start()
     GetSubsystem<Log>()->SetLevel(LOG_DEBUG);
 #endif
 
+    scene_ = new Scene(context_);
+    scene_->CreateComponent<Octree>();
+
+    Node* playerNode = scene_->CreateChild("player");
+    InputActionMapper* mapper = playerNode->CreateComponent<InputActionMapper>();
+    Player* player = playerNode->CreateComponent<Player>();
+    mapper->SetConfig(cache->GetResource<XMLFile>("Config/InputMap.xml"));
+    player->SetInputActionMapper(mapper);
+
     SubscribeToEvents();
 }
 
 // ----------------------------------------------------------------------------
 void AsteroidsApplication::Stop()
 {
-
 }
 
 // ----------------------------------------------------------------------------
 void AsteroidsApplication::RegisterStuff()
 {
 #if defined(DEBUG)
-    context_->RegisterSubsystem(new DebugTextScroll(context_));
+    DebugTextScroll::RegisterSubsystem(context_);
     GetSubsystem<DebugTextScroll>()->SetTextCount(40);
+    GetSubsystem<DebugTextScroll>()->SetTimeout(10);
 #endif
 
+    InputActionMapper::RegisterObject(context_);
     Player::RegisterObject(context_);
 }
 
@@ -100,7 +112,13 @@ void AsteroidsApplication::HandleKeyDown(StringHash eventType, VariantMap& event
 
     // Exit game
     if (key == KEY_ESCAPE)
+    {
+        // Avoids crashing due to missing UI root element during shutdown
+#if defined(DEBUG)
+        DebugTextScroll::RemoveSubsystem(context_);
+#endif
         engine_->Exit();
+    }
 
     // Toggle debug HUD
     if (key == KEY_F2)

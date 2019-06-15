@@ -9,6 +9,7 @@ define_source_files(
         "src/main.cpp"
         "src/AsteroidsApplication.cpp"
         "src/DebugTextScroll.cpp"
+        "src/InputActionMapper.cpp"
         "src/Player.cpp"
     GLOB_H_PATTERNS
         "include/Asteroids/*.hpp")

@@ -1,7 +1,9 @@
 #include "Asteroids/DebugTextScroll.hpp"
 
+#include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Input/InputEvents.h>
 #include <Urho3D/IO/IOEvents.h>
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/UI/UI.h>
@@ -13,11 +15,24 @@ using namespace Urho3D;
 namespace Asteroids {
 
 // ----------------------------------------------------------------------------
-DebugTextScroll::DebugTextScroll(Urho3D::Context* context) :
-    Object(context)
+DebugTextScroll::DebugTextScroll(Context* context) :
+    Object(context),
+    timeoutSetting_(5)
 {
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(DebugTextScroll, HandleUpdate));
     SubscribeToEvent(E_LOGMESSAGE, URHO3D_HANDLER(DebugTextScroll, HandleLogMessage));
+}
+
+// ----------------------------------------------------------------------------
+void DebugTextScroll::RegisterSubsystem(Context* context)
+{
+    context->RegisterSubsystem<DebugTextScroll>();
+}
+
+// ----------------------------------------------------------------------------
+void DebugTextScroll::RemoveSubsystem(Context* context)
+{
+    context->RemoveSubsystem<DebugTextScroll>();
 }
 
 // ----------------------------------------------------------------------------
@@ -34,7 +49,7 @@ void DebugTextScroll::SetTextCount(unsigned count)
         item.text_->SetTextAlignment(HA_LEFT);
         item.text_->SetHorizontalAlignment(HA_LEFT);
         item.text_->SetVerticalAlignment(VA_TOP);
-        item.timeOut_ = 0;
+        item.timeout_ = 0;
         items_.Push(item);
     }
 
@@ -46,6 +61,11 @@ void DebugTextScroll::SetTextCount(unsigned count)
     insertIt_ = items_.Begin();
 }
 
+// ----------------------------------------------------------------------------
+void DebugTextScroll::SetTimeout(float seconds)
+{
+    timeoutSetting_ = seconds;
+}
 
 // ----------------------------------------------------------------------------
 void DebugTextScroll::Print(const String& str, const Color& color)
@@ -57,7 +77,7 @@ void DebugTextScroll::Print(const String& str, const Color& color)
     insertIt_->text_->SetOpacity(1);
     insertIt_->text_->SetColor(color);
     insertIt_->text_->SetPosition(0, GetSubsystem<UI>()->GetRoot()->GetHeight() - 40);
-    insertIt_->timeOut_ = 5;
+    insertIt_->timeout_ = timeoutSetting_;
 
     if(++insertIt_ == items_.End())
         insertIt_ = items_.Begin();
@@ -77,9 +97,9 @@ void DebugTextScroll::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
     for(Vector<TextItem>::Iterator it = items_.Begin(); it != items_.End(); ++it)
     {
-        if((it->timeOut_ -= timeStep) < 0)
+        if((it->timeout_ -= timeStep) < 0)
         {
-            float opacity = it->timeOut_ + 1;
+            float opacity = it->timeout_ + 1;
             if(opacity > 0)
                 it->text_->SetOpacity(opacity);
             else
@@ -93,8 +113,6 @@ void DebugTextScroll::HandleLogMessage(StringHash eventType, VariantMap& eventDa
 {
     using namespace LogMessage;
     int level = eventData[P_LEVEL].GetInt();
-    if(level < LOG_WARNING)
-        return;
 
     Color color = Color::WHITE;
     if(level == LOG_WARNING)
