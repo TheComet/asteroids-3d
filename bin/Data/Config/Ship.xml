@@ -1,0 +1,7 @@
+<ship>
+    <param name="rotationSpeed" value="300" />
+    <param name="acceleration" value="600" />
+    <param name="maxVelocity" value="1200" />
+    <param name="velocityDecay" value="0.2" />
+</ship>
+

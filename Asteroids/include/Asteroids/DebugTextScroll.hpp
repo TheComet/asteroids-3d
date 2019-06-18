@@ -27,7 +27,6 @@ class DebugTextScroll : public Urho3D::Object
 public:
     DebugTextScroll(Urho3D::Context* context);
     static void RegisterSubsystem(Urho3D::Context* context);
-    static void RemoveSubsystem(Urho3D::Context* context);
 
     void SetTextCount(unsigned count);
     void SetTimeout(float seconds);

@@ -24,7 +24,7 @@
         <action name="Right" key="105" />
         <action name="Fire" key="111" />
         <action name="Thrust" key="112" />
-        <action name="Warp" key="108" />
-        <action name="UseItem" key="252" />
+        <action name="Warp" key="252" />
+        <action name="UseItem" key="108" />
     </device>
 </devices>

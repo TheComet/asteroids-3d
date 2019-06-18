@@ -30,12 +30,6 @@ void DebugTextScroll::RegisterSubsystem(Context* context)
 }
 
 // ----------------------------------------------------------------------------
-void DebugTextScroll::RemoveSubsystem(Context* context)
-{
-    context->RemoveSubsystem<DebugTextScroll>();
-}
-
-// ----------------------------------------------------------------------------
 void DebugTextScroll::SetTextCount(unsigned count)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
@@ -72,11 +66,17 @@ void DebugTextScroll::Print(const String& str, const Color& color)
 {
     if(insertIt_.ptr_ == NULL)
         return;
+    UI* ui = GetSubsystem<UI>();
+    if (ui == nullptr)
+        return;
+    UIElement* root = ui->GetRoot();
+    if (root == nullptr)
+        return;
 
     insertIt_->text_->SetText(str);
     insertIt_->text_->SetOpacity(1);
     insertIt_->text_->SetColor(color);
-    insertIt_->text_->SetPosition(0, GetSubsystem<UI>()->GetRoot()->GetHeight() - 40);
+    insertIt_->text_->SetPosition(0, root->GetHeight() - 40);
     insertIt_->timeout_ = timeoutSetting_;
 
     if(++insertIt_ == items_.End())

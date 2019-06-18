@@ -246,8 +246,8 @@ void InputActionMapper::HandleJoystickAxisMove(StringHash eventType, VariantMap&
         {
             switch(mapping.actionID)
             {
-                case A_LEFT    : newState.field.left = unsigned(Max(position * mapping.position, 0) * 0x3F);  break;
-                case A_RIGHT   : newState.field.right = unsigned(Max(position * mapping.position, 0) * 0x3F); break;
+                case A_LEFT    : newState.field.left = unsigned(Max(position * mapping.position, 0) * 0x3F);  break; // full throttle (6 bits)
+                case A_RIGHT   : newState.field.right = unsigned(Max(position * mapping.position, 0) * 0x3F); break; // full throttle (6 bits)
                 case A_FIRE    : newState.field.fire = (Max(position * mapping.position, 0) > threshold);     break;
                 case A_THRUST  : newState.field.thrust = (Max(position * mapping.position, 0) > threshold);   break;
                 case A_WARP    : newState.field.warp = (Max(position * mapping.position, 0) > threshold);     break;

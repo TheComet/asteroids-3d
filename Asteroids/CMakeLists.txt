@@ -8,8 +8,11 @@ define_source_files(
     GLOB_CPP_PATTERNS
         "src/main.cpp"
         "src/AsteroidsApplication.cpp"
+        "src/Bullet.cpp"
         "src/DebugTextScroll.cpp"
         "src/InputActionMapper.cpp"
+        "src/OrbitingCameraController.cpp"
+        "src/SurfaceObject.cpp"
         "src/Player.cpp"
     GLOB_H_PATTERNS
         "include/Asteroids/*.hpp")
