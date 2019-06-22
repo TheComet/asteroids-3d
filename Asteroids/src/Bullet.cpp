@@ -22,12 +22,6 @@ Bullet::Bullet(Context* context) :
 }
 
 // ----------------------------------------------------------------------------
-void Bullet::RegisterObject(Context* context)
-{
-    context->RegisterFactory<Bullet>();
-}
-
-// ----------------------------------------------------------------------------
 Bullet* Bullet::Create(Scene* scene, Quaternion pivotRotation, float angle)
 {
     ResourceCache* cache = scene->GetSubsystem<ResourceCache>();

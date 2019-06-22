@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Asteroids/Config.hpp"
 #include "Asteroids/SurfaceObject.hpp"
 
 namespace Urho3D
@@ -11,14 +12,12 @@ namespace Asteroids {
 
 class InputActionMapper;
 
-class Player : public SurfaceObject
+class ASTEROIDS_PUBLIC_API Player : public SurfaceObject
 {
     URHO3D_OBJECT(Player, SurfaceObject)
 
 public:
     Player(Urho3D::Context* context);
-
-    static void RegisterObject(Urho3D::Context* context);
 
     static Player* Create(Urho3D::Scene* scene);
     static void Destroy(Player* player);

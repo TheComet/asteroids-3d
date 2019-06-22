@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Asteroids/Config.hpp"
 #include <Urho3D/Core/Object.h>
 
 #if defined(DEBUG)
@@ -20,7 +21,7 @@ namespace Urho3D {
 
 namespace Asteroids {
 
-class DebugTextScroll : public Urho3D::Object
+class ASTEROIDS_PUBLIC_API DebugTextScroll : public Urho3D::Object
 {
     URHO3D_OBJECT(DebugTextScroll, Urho3D::Object);
 

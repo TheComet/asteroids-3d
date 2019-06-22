@@ -31,12 +31,6 @@ Player::Player(Context* context) :
 }
 
 // ----------------------------------------------------------------------------
-void Player::RegisterObject(Context* context)
-{
-    context->RegisterFactory<Player>("Asteroids");
-}
-
-// ----------------------------------------------------------------------------
 Player* Player::Create(Scene* scene)
 {
     ResourceCache* cache = scene->GetSubsystem<ResourceCache>();

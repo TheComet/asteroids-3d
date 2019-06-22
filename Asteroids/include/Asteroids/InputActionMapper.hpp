@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Asteroids/Config.hpp"
 #include <Urho3D/Scene/Component.h>
 
 namespace Urho3D {
@@ -8,13 +9,12 @@ namespace Urho3D {
 
 namespace Asteroids {
 
-class InputActionMapper : public Urho3D::Component
+class ASTEROIDS_PUBLIC_API InputActionMapper : public Urho3D::Component
 {
     URHO3D_OBJECT(InputActionMapper, Urho3D::Component)
 
 public:
     InputActionMapper(Urho3D::Context* context);
-    static void RegisterObject(Urho3D::Context* context);
 
     /*!
      * @brief Sets the config file to use for all of the button mappings.

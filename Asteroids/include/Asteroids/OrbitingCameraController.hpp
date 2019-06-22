@@ -1,16 +1,16 @@
 #pragma once
 
+#include "Asteroids/Config.hpp"
 #include <Urho3D/Scene/Component.h>
 
 namespace Asteroids {
 
-class OrbitingCameraController : public Urho3D::Component
+class ASTEROIDS_PUBLIC_API OrbitingCameraController : public Urho3D::Component
 {
     URHO3D_OBJECT(OrbitingCameraController, Urho3D::Component)
 
 public:
     OrbitingCameraController(Urho3D::Context* context);
-    static void RegisterObject(Urho3D::Context* context);
 
     void SetTrackNode(Urho3D::Node* nodeToTrack);
     void SetDistance(float distance);

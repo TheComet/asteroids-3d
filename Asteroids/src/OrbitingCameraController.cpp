@@ -16,12 +16,6 @@ OrbitingCameraController::OrbitingCameraController(Context* context) :
 }
 
 // ----------------------------------------------------------------------------
-void OrbitingCameraController::RegisterObject(Context* context)
-{
-    context->RegisterFactory<OrbitingCameraController>();
-}
-
-// ----------------------------------------------------------------------------
 void OrbitingCameraController::SetTrackNode(Node* nodeToTrack)
 {
     if (trackNode_)

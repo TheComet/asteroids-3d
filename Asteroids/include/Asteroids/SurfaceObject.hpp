@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Asteroids/Config.hpp"
 #include <Urho3D/Scene/Component.h>
 
 namespace Asteroids {
@@ -9,7 +10,7 @@ namespace Asteroids {
  *
  *
  */
-class SurfaceObject : public Urho3D::Component
+class ASTEROIDS_PUBLIC_API SurfaceObject : public Urho3D::Component
 {
     URHO3D_OBJECT(SurfaceObject, Urho3D::Component)
 

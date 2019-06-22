@@ -27,12 +27,6 @@ InputActionMapper::InputActionMapper(Context* context) :
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::RegisterObject(Context* context)
-{
-    context->RegisterFactory<InputActionMapper>();
-}
-
-// ----------------------------------------------------------------------------
 void InputActionMapper::SetConfig(Urho3D::XMLFile* mappingConfig)
 {
     if (configFile_)

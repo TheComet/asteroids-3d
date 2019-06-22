@@ -1,0 +1,25 @@
+#ifndef ASTEROIDS_CONFIG_HPP
+#   define ASTEROIDS_CONFIG_HPP
+
+    // ------------------------------------------------------------------------
+    // set ASTEROIDS_LIB_TYPE to either SHARED or STATIC
+    // ------------------------------------------------------------------------
+
+#   define ASTEROIDS_${ASTEROIDS_LIB_TYPE}
+
+#   if !defined(ASTEROIDS_SHARED) && !defined(ASTEROIDS_STATIC)
+#       error Please define ASTEROIDS_SHARED or ASTEROIDS_STATIC.
+#   endif
+
+    // ------------------------------------------------------------------------
+    // Visibility macros
+    // ------------------------------------------------------------------------
+
+#   if defined(ASTEROIDS_BUILDING) /* defined by CMake when library is being compiled */
+#       define ASTEROIDS_PUBLIC_API ${ASTEROIDS_API_EXPORT}
+#   else
+#       define ASTEROIDS_PUBLIC_API ${ASTEROIDS_API_IMPORT}
+#   endif
+#   define ASTEROIDS_PRIVATE_API ${ASTEROIDS_API_LOCAL}
+
+#endif // ASTEROIDS_CONFIG_HPP
