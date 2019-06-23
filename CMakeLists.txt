@@ -10,4 +10,5 @@ project ("Asteroids 3D")
 
 add_subdirectory ("Asteroids")
 add_subdirectory ("Client")
+add_subdirectory ("Server")
 add_subdirectory ("Editor")

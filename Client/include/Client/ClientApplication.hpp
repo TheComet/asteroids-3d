@@ -19,12 +19,14 @@ public:
     virtual void Stop() override;
 
 private:
-    void RegisterStuff();
-    void CreateDebugHud();
     void SubscribeToEvents();
+    void CreateDebugHud();
 
     void HandleKeyDown(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandlePostRenderUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleServerConnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleServerDisconnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleConnectFailed(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;

@@ -9,28 +9,25 @@ namespace Urho3D {
 
 namespace Asteroids {
 
-class AsteroidsApplication : public Urho3D::Application
+class ServerApplication : public Urho3D::Application
 {
 public:
-    AsteroidsApplication(Urho3D::Context* context);
+    ServerApplication(Urho3D::Context* context);
 
     virtual void Setup() override;
     virtual void Start() override;
     virtual void Stop() override;
 
 private:
-    void RegisterStuff();
-    void CreateDebugHud();
     void SubscribeToEvents();
-
-    void HandleKeyDown(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandlePostRenderUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void LoadScene();
+    void HandleClientConnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleClientDisconnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleClientIdentity(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleClientSceneLoaded(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;
-    Urho3D::SharedPtr<Urho3D::DebugHud> debugHud_;
-    bool drawPhyGeometry_;
 };
 
 }
-
