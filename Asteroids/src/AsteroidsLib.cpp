@@ -16,11 +16,11 @@ const char* ASTEROIDS_CATEGORY = "Asteroids";
 // ----------------------------------------------------------------------------
 void RegisterObjectFactories(Context* context)
 {
-    context->RegisterFactory<Asteroid>();
-    context->RegisterFactory<Bullet>();
-    context->RegisterFactory<InputActionMapper>();
-    context->RegisterFactory<OrbitingCameraController>();
-    context->RegisterFactory<Player>();
+    context->RegisterFactory<Asteroid>(ASTEROIDS_CATEGORY);
+    context->RegisterFactory<Bullet>(ASTEROIDS_CATEGORY);
+    context->RegisterFactory<InputActionMapper>(ASTEROIDS_CATEGORY);
+    context->RegisterFactory<OrbitingCameraController>(ASTEROIDS_CATEGORY);
+    context->RegisterFactory<Player>(ASTEROIDS_CATEGORY);
 }
 
 }

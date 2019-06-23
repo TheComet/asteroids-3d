@@ -9,6 +9,7 @@
 
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/DebugHud.h>
+#include <Urho3D/Engine/EngineDefs.h>
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Graphics/DebugRenderer.h>
 #include <Urho3D/Graphics/Model.h>
@@ -40,10 +41,11 @@ ClientApplication::ClientApplication(Context* context) :
 // ----------------------------------------------------------------------------
 void ClientApplication::Setup()
 {
-    engineParameters_["FullScreen"]      = false;
-    engineParameters_["WindowResizable"] = true;
-    engineParameters_["VSync"]           = true;
-    engineParameters_["Multisample"]     = 2;
+    engineParameters_[EP_LOG_NAME]         = "asteroids-client.log";
+    engineParameters_[EP_FULL_SCREEN]      = false;
+    engineParameters_[EP_WINDOW_RESIZABLE] = true;
+    engineParameters_[EP_VSYNC]            = true;
+    engineParameters_[EP_MULTI_SAMPLE]     = 2;
 }
 
 // ----------------------------------------------------------------------------
