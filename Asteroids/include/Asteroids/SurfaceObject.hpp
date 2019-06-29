@@ -24,7 +24,6 @@ protected:
     void UpdatePlanetHeight(float offset=0.0);
 
 private:
-
     float planetHeight_;
 };
 

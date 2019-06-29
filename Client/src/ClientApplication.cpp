@@ -1,11 +1,11 @@
 #include "Client/ClientApplication.hpp"
+#include "Asteroids/ActionState.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/Bullet.hpp"
 #include "Asteroids/DebugTextScroll.hpp"
 #include "Asteroids/Globals.hpp"
-#include "Asteroids/InputActionMapper.hpp"
 #include "Asteroids/OrbitingCameraController.hpp"
-#include "Asteroids/Player.hpp"
+#include "Asteroids/ShipController.hpp"
 
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/DebugHud.h>

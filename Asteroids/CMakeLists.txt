@@ -13,13 +13,14 @@ configure_file ("templates/Config.hpp.in" "include/generated/Asteroids/Config.hp
 
 define_source_files(
     EXTRA_CPP_FILES
+        "src/ActionState.cpp"
         "src/Asteroid.cpp"
         "src/AsteroidsLib.cpp"
         "src/Bullet.cpp"
         "src/DebugTextScroll.cpp"
-        "src/InputActionMapper.cpp"
+        "src/DeviceInputMapper.cpp"
         "src/OrbitingCameraController.cpp"
-        "src/Player.cpp"
+        "src/ShipController.cpp"
         "src/SurfaceObject.cpp"
     GLOB_H_PATTERNS
         "include/Asteroids/*.hpp")

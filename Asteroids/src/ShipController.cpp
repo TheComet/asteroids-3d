@@ -1,8 +1,9 @@
+#include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/Bullet.hpp"
 #include "Asteroids/Globals.hpp"
-#include "Asteroids/Player.hpp"
-#include "Asteroids/InputActionMapper.hpp"
-#include "Asteroids/InputActionMapperEvents.hpp"
+#include "Asteroids/ShipController.hpp"
+#include "Asteroids/ActionState.hpp"
+#include "Asteroids/ActionStateEvents.hpp"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/CoreEvents.h>
@@ -14,6 +15,7 @@
 #include <Urho3D/Graphics/StaticModel.h>
 #include <Urho3D/Scene/Node.h>
 #include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Scene/SceneEvents.h>
 #include <Urho3D/IO/Log.h>
 
 using namespace Urho3D;
@@ -21,50 +23,28 @@ using namespace Urho3D;
 namespace Asteroids {
 
 // ----------------------------------------------------------------------------
-Player::Player(Context* context) :
+ShipController::ShipController(Context* context) :
     SurfaceObject(context),
     shipConfig_({0, 0, 0, 0}),
     angle_(0),
-    shootCooldown_(0)
+    fireActionCooldown_(0)
 {
-    SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(Player, HandleUpdate));
 }
 
 // ----------------------------------------------------------------------------
-Player* Player::Create(Scene* scene)
+void ShipController::RegisterObject(Context* context)
 {
-    ResourceCache* cache = scene->GetSubsystem<ResourceCache>();
+    context->RegisterFactory<ShipController>(ASTEROIDS_CATEGORY);
 
-    Node* playerPivotNode = scene->CreateChild("PlayerPivot");
-    Node* playerModelNode = playerPivotNode->CreateChild("PlayerModel");
-    playerModelNode->SetPosition(Vector3(0, 1, 0));
-
-    InputActionMapper* mapper = playerModelNode->CreateComponent<InputActionMapper>();
-    mapper->SetConfig(cache->GetResource<XMLFile>("Config/InputMap.xml"));
-
-    StaticModel* playerModel = playerModelNode->CreateComponent<StaticModel>();
-    playerModel->SetModel(cache->GetResource<Model>("Models/TestShip.mdl"));
-    playerModel->SetMaterial(cache->GetResource<Material>("Materials/DefaultGrey.xml"));
-
-    Player* player = playerModelNode->CreateComponent<Player>();
-    player->ListenToMapper(mapper);
-    player->SetConfig(cache->GetResource<XMLFile>("Config/Ship.xml"));
-    player->UpdatePlanetHeight();
-
-    return player;
+    URHO3D_ACCESSOR_ATTRIBUTE("Ship Config", GetConfigAttr, SetConfigAttr, ResourceRef, ResourceRef(XMLFile::GetTypeStatic()), AM_DEFAULT);
 }
 
 // ----------------------------------------------------------------------------
-void Player::Destroy(Player* player)
-{
-    player->GetNode()->GetParent()->Remove();
-}
-
-// ----------------------------------------------------------------------------
-void Player::SetConfig(XMLFile* config)
+void ShipController::SetConfig(XMLFile* config)
 {
     if (configFile_)
     {
+        UnsubscribeFromEvent(E_UPDATE);
         UnsubscribeFromEvent(E_FILECHANGED);
     }
 
@@ -72,31 +52,27 @@ void Player::SetConfig(XMLFile* config)
 
     if (configFile_)
     {
-        SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER(Player, HandleFileChanged));
+        SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(ShipController, HandleUpdate));
+        SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER(ShipController, HandleFileChanged));
         ReadShipConfig();
     }
 }
 
 // ----------------------------------------------------------------------------
-void Player::ListenToMapper(InputActionMapper* mapper)
+ResourceRef ShipController::GetConfigAttr() const
 {
-    if (mapper_)
-    {
-        UnsubscribeFromEvent(E_ACTIONWARP);
-        UnsubscribeFromEvent(E_ACTIONUSEITEM);
-    }
-
-    mapper_ = mapper;
-
-    if (mapper_)
-    {
-        SubscribeToEvent(mapper, E_ACTIONWARP, URHO3D_HANDLER(Player, HandleActionWarp));
-        SubscribeToEvent(mapper, E_ACTIONUSEITEM, URHO3D_HANDLER(Player, HandleActionUseItem));
-    }
+    return GetResourceRef(configFile_, XMLFile::GetTypeStatic());
 }
 
 // ----------------------------------------------------------------------------
-void Player::ReadShipConfig()
+void ShipController::SetConfigAttr(const ResourceRef& value)
+{
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+    SetConfig(cache->GetResource<XMLFile>(value.name_));
+}
+
+// ----------------------------------------------------------------------------
+void ShipController::ReadShipConfig()
 {
     XMLElement ship = configFile_->GetRoot();
     for (XMLElement param = ship.GetChild("param"); param; param = param.GetNext("param"))
@@ -114,32 +90,54 @@ void Player::ReadShipConfig()
 }
 
 // ----------------------------------------------------------------------------
-void Player::HandleUpdate(StringHash eventType, VariantMap& eventData)
+bool ShipController::TryGetActionState()
+{
+    if (state_.NotNull())
+    {
+        UnsubscribeFromEvent(E_ACTIONWARP);
+        UnsubscribeFromEvent(E_ACTIONUSEITEM);
+        state_ = nullptr;
+    }
+
+    state_ = GetComponent<ActionState>();
+
+    if (state_.NotNull())
+    {
+        SubscribeToEvent(state_, E_ACTIONWARP, URHO3D_HANDLER(ShipController, HandleActionWarp));
+        SubscribeToEvent(state_, E_ACTIONUSEITEM, URHO3D_HANDLER(ShipController, HandleActionUseItem));
+    }
+
+    return state_.Expired();
+}
+
+// ----------------------------------------------------------------------------
+void ShipController::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
     using namespace Update;
 
     float dt = eventData[P_TIMESTEP].GetFloat();
 
-    // Need input mapper to function
-    if (mapper_.Expired())
-    {
-        ListenToMapper(nullptr);
+    if (state_.Expired() && TryGetActionState() == false)
         return;
-    }
 
     // Update Y rotation of player model depending on left/right input
-    angle_ += (mapper_->GetRight() - mapper_->GetLeft()) * shipConfig_.rotationSpeed_ * dt;
+    angle_ += (state_->GetRight() - state_->GetLeft()) * shipConfig_.rotationSpeed_ * dt;
     if (angle_ > 360) angle_ -= 360;
     if (angle_ < 0) angle_ += 360;
     node_->SetRotation(Quaternion(0, angle_, 0));
 
-    if (mapper_->IsThrusting())
+    if (state_->IsThrusting())
     {
         // Update player speed
         velocity_.x_ += Sin(angle_) * shipConfig_.acceleration_ * dt;
         velocity_.y_ += Cos(angle_) * shipConfig_.acceleration_ * dt;
 
         // Speed limit
+        float currentSpeedSquared = velocity_.LengthSquared();
+        if (currentSpeedSquared > shipConfig_.maxVelocity_ * shipConfig_.maxVelocity_)
+            velocity_ /= Sqrt(currentSpeedSquared) * shipConfig_.maxVelocity_;
+
+        /* TODO old implementation, remove
         float angleOfTrajectory = Atan2(velocity_.y_, velocity_.x_);
         float maxX = Cos(angleOfTrajectory) * shipConfig_.maxVelocity_;
         float maxZ = Sin(angleOfTrajectory) * shipConfig_.maxVelocity_;
@@ -150,7 +148,7 @@ void Player::HandleUpdate(StringHash eventType, VariantMap& eventData)
         if (maxZ > 0)
             velocity_.y_ = Min(velocity_.y_, maxZ);
         else
-            velocity_.y_ = Max(velocity_.y_, maxZ);
+            velocity_.y_ = Max(velocity_.y_, maxZ);*/
     }
     else
     {
@@ -163,10 +161,10 @@ void Player::HandleUpdate(StringHash eventType, VariantMap& eventData)
         velocity_.y_ -= Sin(angleOfTrajectory) * decay;
     }
 
-    shootCooldown_ = Max(0.0, shootCooldown_ - dt);
-    if (shootCooldown_ == 0.0 && mapper_->IsFiring())
+    fireActionCooldown_ = Max(0.0, fireActionCooldown_ - dt);
+    if (fireActionCooldown_ == 0.0 && state_->IsFiring())
     {
-        shootCooldown_ = 0.2;
+        fireActionCooldown_ = 0.2;
         Bullet::Create(GetScene(), node_->GetParent()->GetRotation(), angle_);
     }
 
@@ -175,18 +173,18 @@ void Player::HandleUpdate(StringHash eventType, VariantMap& eventData)
 }
 
 // ----------------------------------------------------------------------------
-void Player::HandleActionWarp(StringHash eventType, VariantMap& eventData)
+void ShipController::HandleActionWarp(StringHash eventType, VariantMap& eventData)
 {
     URHO3D_LOGDEBUG("Warp action");
 }
 
 // ----------------------------------------------------------------------------
-void Player::HandleActionUseItem(StringHash eventType, VariantMap& eventData)
+void ShipController::HandleActionUseItem(StringHash eventType, VariantMap& eventData)
 {
 }
 
 // ----------------------------------------------------------------------------
-void Player::HandleFileChanged(StringHash eventType, VariantMap& eventData)
+void ShipController::HandleFileChanged(StringHash eventType, VariantMap& eventData)
 {
     using namespace FileChanged;
 

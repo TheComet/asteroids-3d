@@ -1,5 +1,6 @@
-#include "Asteroids/InputActionMapper.hpp"
-#include "Asteroids/InputActionMapperEvents.hpp"
+#include "Asteroids/ActionState.hpp"
+#include "Asteroids/AsteroidsLib.hpp"
+#include "Asteroids/DeviceInputMapper.hpp"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Input/Input.h>
@@ -12,22 +13,27 @@ using namespace Urho3D;
 namespace Asteroids {
 
 // ----------------------------------------------------------------------------
-InputActionMapper::InputActionMapper(Context* context) :
-    Component(context),
-    state_({})
+DeviceInputMapper::DeviceInputMapper (Context* context) :
+    Component(context)
 {
-    SubscribeToEvent(E_JOYSTICKCONNECTED, URHO3D_HANDLER(InputActionMapper, HandleJoystickConnected));
-    SubscribeToEvent(E_JOYSTICKDISCONNECTED, URHO3D_HANDLER(InputActionMapper, HandleJoystickDisconnected));
-    SubscribeToEvent(E_JOYSTICKBUTTONDOWN, URHO3D_HANDLER(InputActionMapper, HandleJoystickButtonDown));
-    SubscribeToEvent(E_JOYSTICKBUTTONUP, URHO3D_HANDLER(InputActionMapper, HandleJoystickButtonUp));
-    SubscribeToEvent(E_JOYSTICKAXISMOVE, URHO3D_HANDLER(InputActionMapper, HandleJoystickAxisMove));
-    SubscribeToEvent(E_JOYSTICKHATMOVE, URHO3D_HANDLER(InputActionMapper, HandleJoystickHatMove));
-    SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(InputActionMapper, HandleKeyDown));
-    SubscribeToEvent(E_KEYUP, URHO3D_HANDLER(InputActionMapper, HandleKeyUp));
+    SubscribeToEvent(E_JOYSTICKCONNECTED, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickConnected));
+    SubscribeToEvent(E_JOYSTICKDISCONNECTED, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickDisconnected));
+    SubscribeToEvent(E_JOYSTICKBUTTONDOWN, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickButtonDown));
+    SubscribeToEvent(E_JOYSTICKBUTTONUP, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickButtonUp));
+    SubscribeToEvent(E_JOYSTICKAXISMOVE, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickAxisMove));
+    SubscribeToEvent(E_JOYSTICKHATMOVE, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickHatMove));
+    SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER( DeviceInputMapper, HandleKeyDown));
+    SubscribeToEvent(E_KEYUP, URHO3D_HANDLER( DeviceInputMapper, HandleKeyUp));
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::SetConfig(Urho3D::XMLFile* mappingConfig)
+void DeviceInputMapper::RegisterObject(Context* context)
+{
+    context->RegisterFactory<DeviceInputMapper>(ASTEROIDS_CATEGORY);
+}
+
+// ----------------------------------------------------------------------------
+void DeviceInputMapper::SetConfig(Urho3D::XMLFile* mappingConfig)
 {
     if (configFile_)
     {
@@ -38,13 +44,13 @@ void InputActionMapper::SetConfig(Urho3D::XMLFile* mappingConfig)
 
     if (configFile_)
     {
-        SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER(InputActionMapper, HandleFileChanged));
+        SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER( DeviceInputMapper, HandleFileChanged));
         UpdateMappingFromConfig();
     }
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::UpdateMappingFromConfig()
+void DeviceInputMapper::UpdateMappingFromConfig()
 {
     mappings_.Clear();
 
@@ -108,49 +114,7 @@ void InputActionMapper::UpdateMappingFromConfig()
 }
 
 // ----------------------------------------------------------------------------
-uint16_t InputActionMapper::GetState() const
-{
-    return state_.bits;
-}
-
-// ----------------------------------------------------------------------------
-void InputActionMapper::SetState(uint16_t newState)
-{
-    VariantMap& eventData = GetEventDataMap();
-    uint16_t posEdge = newState & ~state_.bits;
-
-    if (posEdge & 0x4000) SendEvent(E_ACTIONWARP, eventData);
-    if (posEdge & 0x8000) SendEvent(E_ACTIONUSEITEM, eventData);
-
-    state_.bits = newState;
-}
-
-// ----------------------------------------------------------------------------
-float InputActionMapper::GetLeft() const
-{
-    return float(state_.field.left) / 0x3F;
-}
-
-// ----------------------------------------------------------------------------
-float InputActionMapper::GetRight() const
-{
-    return float(state_.field.right) / 0x3F;
-}
-
-// ----------------------------------------------------------------------------
-bool InputActionMapper::IsFiring() const
-{
-    return (state_.field.fire == 1);
-}
-
-// ----------------------------------------------------------------------------
-bool InputActionMapper::IsThrusting() const
-{
-    return (state_.field.thrust == 1);
-}
-
-// ----------------------------------------------------------------------------
-void InputActionMapper::HandleJoystickConnected(StringHash eventType, VariantMap& eventData)
+void DeviceInputMapper::HandleJoystickConnected(StringHash eventType, VariantMap& eventData)
 {
     using namespace JoystickConnected;
     int id = eventData[P_JOYSTICKID].GetInt();
@@ -162,7 +126,7 @@ void InputActionMapper::HandleJoystickConnected(StringHash eventType, VariantMap
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::HandleJoystickDisconnected(StringHash eventType, VariantMap& eventData)
+void DeviceInputMapper::HandleJoystickDisconnected(StringHash eventType, VariantMap& eventData)
 {
     using namespace JoystickDisconnected;
     int id = eventData[P_JOYSTICKID].GetInt();
@@ -173,59 +137,61 @@ void InputActionMapper::HandleJoystickDisconnected(StringHash eventType, Variant
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::HandleJoystickButtonDown(StringHash eventType, VariantMap& eventData)
+void DeviceInputMapper::HandleJoystickButtonDown(StringHash eventType, VariantMap& eventData)
 {
     using namespace JoystickButtonDown;
 
     int joyID = eventData[P_JOYSTICKID].GetInt();
     int buttonID = eventData[P_BUTTON].GetInt();
+    ActionState* state = GetComponent<ActionState>();
+    if (state == nullptr)
+        return;
 
-    State newState = state_;
     for (const Mapping& mapping : mappings_)
         if (mapping.deviceID == joyID && mapping.type == T_BUTTON && mapping.buttonID == buttonID)
         {
             switch(mapping.actionID)
             {
-                case A_LEFT    : newState.field.left = 0x3F;  break; // full throttle (6 bits)
-                case A_RIGHT   : newState.field.right = 0x3F; break; // full throttle (6 bits)
-                case A_THRUST  : newState.field.thrust = 1;   break;
-                case A_FIRE    : newState.field.fire = 1; break;
-                case A_WARP    : newState.field.warp = 1; break;
-                case A_USEITEM : newState.field.useItem = 1; break;
+                case A_LEFT    : state->SetLeft(1.0);       break;
+                case A_RIGHT   : state->SetRight(1.0);      break;
+                case A_THRUST  : state->SetThrusting(true); break;
+                case A_FIRE    : state->SetFiring(true);    break;
+                case A_WARP    : state->SetWarp(true);      break;
+                case A_USEITEM : state->SetUseItem(true);   break;
             }
-            SetState(newState.bits);
             break;
         }
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::HandleJoystickButtonUp(StringHash eventType, VariantMap& eventData)
+void DeviceInputMapper::HandleJoystickButtonUp(StringHash eventType, VariantMap& eventData)
 {
     using namespace JoystickButtonUp;
 
     int joyID = eventData[P_JOYSTICKID].GetInt();
     int buttonID = eventData[P_BUTTON].GetInt();
+    ActionState* state = GetComponent<ActionState>();
+    if (state == nullptr)
+        return;
 
-    State newState = state_;
     for (const Mapping& mapping : mappings_)
         if (mapping.deviceID == joyID && mapping.type == T_BUTTON && mapping.buttonID == buttonID)
         {
             switch(mapping.actionID)
             {
-                case A_LEFT    : newState.field.left = 0;     break;
-                case A_RIGHT   : newState.field.right = 0;    break;
-                case A_FIRE    : newState.field.fire = 0;     break;
-                case A_THRUST  : newState.field.thrust = 0;   break;
-                case A_WARP    : newState.field.warp = 0;     break;
-                case A_USEITEM : newState.field.useItem = 0;  break;
+                case A_LEFT    : state->SetLeft(0.0);        break;
+                case A_RIGHT   : state->SetRight(0.0);       break;
+                case A_THRUST  : state->SetThrusting(false); break;
+                case A_FIRE    : state->SetFiring(false);    break;
+                case A_WARP    : state->SetWarp(false);      break;
+                case A_USEITEM : state->SetUseItem(false);   break;
             }
-            SetState(newState.bits);
             break;
         }
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::HandleJoystickAxisMove(StringHash eventType, VariantMap& eventData)
+void DeviceInputMapper::HandleJoystickAxisMove(StringHash eventType, VariantMap& eventData)
 {
     using namespace JoystickAxisMove;
 
@@ -233,102 +199,106 @@ void InputActionMapper::HandleJoystickAxisMove(StringHash eventType, VariantMap&
     int axisID = eventData[P_AXIS].GetInt();
     float position = eventData[P_POSITION].GetFloat();
     const float threshold = 0.4;
+    ActionState* state = GetComponent<ActionState>();
+    if (state == nullptr)
+        return;
 
-    State newState = state_;
     for (const Mapping& mapping : mappings_)
         if (mapping.deviceID == joyID && mapping.type == T_AXIS && mapping.buttonID == axisID)
         {
             switch(mapping.actionID)
             {
-                case A_LEFT    : newState.field.left = unsigned(Max(position * mapping.position, 0) * 0x3F);  break; // full throttle (6 bits)
-                case A_RIGHT   : newState.field.right = unsigned(Max(position * mapping.position, 0) * 0x3F); break; // full throttle (6 bits)
-                case A_FIRE    : newState.field.fire = (Max(position * mapping.position, 0) > threshold);     break;
-                case A_THRUST  : newState.field.thrust = (Max(position * mapping.position, 0) > threshold);   break;
-                case A_WARP    : newState.field.warp = (Max(position * mapping.position, 0) > threshold);     break;
-                case A_USEITEM : newState.field.useItem = (Max(position * mapping.position, 0) > threshold);  break;
+                case A_LEFT    : state->SetLeft(Max(position * mapping.position, 0)); break;
+                case A_RIGHT   : state->SetRight(Max(position * mapping.position, 0)); break;
+                case A_FIRE    : state->SetFiring(Max(position * mapping.position, 0) > threshold); break;
+                case A_THRUST  : state->SetThrusting(Max(position * mapping.position, 0) > threshold); break;
+                case A_WARP    : state->SetWarp(Max(position * mapping.position, 0) > threshold); break;
+                case A_USEITEM : state->SetUseItem(Max(position * mapping.position, 0) > threshold); break;
             }
-            SetState(newState.bits);
         }
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::HandleJoystickHatMove(StringHash eventType, VariantMap& eventData)
+void DeviceInputMapper::HandleJoystickHatMove(StringHash eventType, VariantMap& eventData)
 {
     using namespace JoystickHatMove;
 
     int joyID = eventData[P_JOYSTICKID].GetInt();
     int hatID = eventData[P_HAT].GetInt();
     int position = eventData[P_POSITION].GetInt();
+    ActionState* state = GetComponent<ActionState>();
+    if (state == nullptr)
+        return;
 
-    State newState = state_;
     for (const Mapping& mapping : mappings_)
         if (mapping.deviceID == joyID && mapping.type == T_HAT && mapping.buttonID == hatID)
         {
             switch(mapping.actionID)
             {
-                case A_LEFT    : newState.field.left = (position & mapping.position) * 0x3F;  break; // full throttle (6 bits)
-                case A_RIGHT   : newState.field.right = (position & mapping.position) * 0x3F; break; // full throttle (6 bits)
-                case A_FIRE    : newState.field.fire = (position & mapping.position);     break;
-                case A_THRUST  : newState.field.thrust = (position & mapping.position);   break;
-                case A_WARP    : newState.field.warp = (position & mapping.position);     break;
-                case A_USEITEM : newState.field.useItem = (position & mapping.position);  break;
+                case A_LEFT    : state->SetLeft(position & mapping.position ? 1.0 : 0.0);  break;
+                case A_RIGHT   : state->SetRight(position & mapping.position ? 1.0 : 0.0); break;
+                case A_FIRE    : state->SetFiring(position & mapping.position ? true : false); break;
+                case A_THRUST  : state->SetThrusting(position & mapping.position ? true : false); break;
+                case A_WARP    : state->SetWarp(position & mapping.position ? true : false); break;
+                case A_USEITEM : state->SetUseItem(position & mapping.position ? true : false); break;
             }
-            SetState(newState.bits);
         }
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::HandleKeyDown(StringHash eventType, VariantMap& eventData)
+void DeviceInputMapper::HandleKeyDown(StringHash eventType, VariantMap& eventData)
 {
     using namespace KeyDown;
 
     int keyID = eventData[P_KEY].GetInt();
+    ActionState* state = GetComponent<ActionState>();
+    if (state == nullptr)
+        return;
 
-    State newState = state_;
     for (const Mapping& mapping : mappings_)
         if (mapping.deviceID == -1 && mapping.type == T_KEY && mapping.buttonID == keyID)
         {
             switch(mapping.actionID)
             {
-                case A_LEFT    : newState.field.left = 0x3F;  break; // full throttle (6 bits)
-                case A_RIGHT   : newState.field.right = 0x3F; break; // full throttle (6 bits)
-                case A_FIRE    : newState.field.fire = 1;     break;
-                case A_THRUST  : newState.field.thrust = 1;   break;
-                case A_WARP    : newState.field.warp = 1;     break;
-                case A_USEITEM : newState.field.useItem = 1;  break;
+                case A_LEFT    : state->SetLeft(1.0);       break;
+                case A_RIGHT   : state->SetRight(1.0);      break;
+                case A_THRUST  : state->SetThrusting(true); break;
+                case A_FIRE    : state->SetFiring(true);    break;
+                case A_WARP    : state->SetWarp(true);      break;
+                case A_USEITEM : state->SetUseItem(true);   break;
             }
-            SetState(newState.bits);
             break;
         }
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::HandleKeyUp(StringHash eventType, VariantMap& eventData)
+void DeviceInputMapper::HandleKeyUp(StringHash eventType, VariantMap& eventData)
 {
     using namespace KeyUp;
 
     int keyID = eventData[P_KEY].GetInt();
+    ActionState* state = GetComponent<ActionState>();
+    if (state == nullptr)
+        return;
 
-    State newState = state_;
     for (const Mapping& mapping : mappings_)
         if (mapping.deviceID == -1 && mapping.type == T_KEY && mapping.buttonID == keyID)
         {
             switch(mapping.actionID)
             {
-                case A_LEFT    : newState.field.left = 0;     break;
-                case A_RIGHT   : newState.field.right = 0;    break;
-                case A_FIRE    : newState.field.fire = 0;     break;
-                case A_THRUST  : newState.field.thrust = 0;   break;
-                case A_WARP    : newState.field.warp = 0;     break;
-                case A_USEITEM : newState.field.useItem = 0;  break;
+                case A_LEFT    : state->SetLeft(0.0);        break;
+                case A_RIGHT   : state->SetRight(0.0);       break;
+                case A_THRUST  : state->SetThrusting(false); break;
+                case A_FIRE    : state->SetFiring(false);    break;
+                case A_WARP    : state->SetWarp(false);      break;
+                case A_USEITEM : state->SetUseItem(false);   break;
             }
-            SetState(newState.bits);
             break;
         }
 }
 
 // ----------------------------------------------------------------------------
-void InputActionMapper::HandleFileChanged(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData)
+void DeviceInputMapper::HandleFileChanged(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData)
 {
     using namespace FileChanged;
 

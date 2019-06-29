@@ -10,25 +10,26 @@ namespace Urho3D
 
 namespace Asteroids {
 
-class InputActionMapper;
+class ActionState;
 
-class ASTEROIDS_PUBLIC_API Player : public SurfaceObject
+class ASTEROIDS_PUBLIC_API ShipController : public SurfaceObject
 {
-    URHO3D_OBJECT(Player, SurfaceObject)
+    URHO3D_OBJECT(ShipController, SurfaceObject)
 
 public:
-    Player(Urho3D::Context* context);
+    ShipController(Urho3D::Context* context);
 
-    static Player* Create(Urho3D::Scene* scene);
-    static void Destroy(Player* player);
+    static void RegisterObject(Urho3D::Context* context);
 
     void SetConfig(Urho3D::XMLFile* config);
 
-    void ListenToMapper(InputActionMapper* mapper);
+    Urho3D::ResourceRef GetConfigAttr() const;
+    void SetConfigAttr(const Urho3D::ResourceRef& value);
 
 private:
     void SubscribeToEvents();
     void ReadShipConfig();
+    bool TryGetActionState();
     void HandleUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleActionWarp(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleActionUseItem(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
@@ -41,13 +42,14 @@ private:
         float acceleration_;
         float maxVelocity_;
         float velocityDecay_;
+        float phaserCooldown_;
     } shipConfig_;
 
-    Urho3D::WeakPtr<InputActionMapper> mapper_;
     Urho3D::SharedPtr<Urho3D::XMLFile> configFile_;
+    Urho3D::WeakPtr<ActionState> state_;
     Urho3D::Vector2 velocity_;
     float angle_;
-    float shootCooldown_;
+    float fireActionCooldown_;
 };
 
 }

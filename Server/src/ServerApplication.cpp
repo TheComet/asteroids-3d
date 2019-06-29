@@ -4,9 +4,7 @@
 #include "Asteroids/Bullet.hpp"
 #include "Asteroids/DebugTextScroll.hpp"
 #include "Asteroids/Globals.hpp"
-#include "Asteroids/InputActionMapper.hpp"
 #include "Asteroids/OrbitingCameraController.hpp"
-#include "Asteroids/Player.hpp"
 
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/DebugHud.h>
@@ -62,11 +60,10 @@ void ServerApplication::Start()
     cache->SetAutoReloadResources(true);
 
     SubscribeToEvents();
+    LoadScene();
 
     Network* network = GetSubsystem<Network>();
     network->StartServer(6666);
-
-    LoadScene();
 }
 
 // ----------------------------------------------------------------------------
@@ -85,53 +82,8 @@ void ServerApplication::LoadScene()
     scene_->CreateComponent<Octree>();
     scene_->CreateComponent<PhysicsWorld>();
 
-    Node* planetTerrainNode = scene_->CreateChild("PlanetTerrain");
-    StaticModel* planetTerrainModel = planetTerrainNode->CreateComponent<StaticModel>();
-    planetTerrainModel->SetModel(cache->GetResource<Model>("Models/TestPlanetTerrain.mdl"));
-    planetTerrainModel->SetMaterial(cache->GetResource<Material>("Materials/DefaultGrey.xml"));
-    RigidBody* planetTerrainBody = planetTerrainNode->CreateComponent<RigidBody>();
-    planetTerrainBody->SetMass(0);
-    planetTerrainBody->SetCollisionLayer(COLLISION_MASK_PLANET_TERRAIN);
-    CollisionShape* planetTerrainCollision = planetTerrainNode->CreateComponent<CollisionShape>();
-    planetTerrainCollision->SetTriangleMesh(cache->GetResource<Model>("Models/TestPlanetTerrain.mdl"));
-
-    Node* planetWallsNode = scene_->CreateChild("PlanetWalls");
-    StaticModel* planetWallsModel = planetWallsNode->CreateComponent<StaticModel>();
-    planetWallsModel->SetModel(cache->GetResource<Model>("Models/TestPlanetWalls.mdl"));
-    planetWallsModel->SetMaterial(cache->GetResource<Material>("Materials/DefaultGrey.xml"));
-    RigidBody* planetWallsBody = planetWallsNode->CreateComponent<RigidBody>();
-    planetWallsBody->SetMass(0);
-    planetWallsBody->SetCollisionLayer(COLLISION_MASK_PLANET_WALLS);
-    CollisionShape* planetWallsCollision = planetWallsNode->CreateComponent<CollisionShape>();
-    planetWallsCollision->SetTriangleMesh(cache->GetResource<Model>("Models/TestPlanetWalls.mdl"));
-
-    Node* lightNode1 = scene_->CreateChild("Light");
-    lightNode1->SetRotation(Quaternion(270, 0, 0));
-    Light* light1 = lightNode1->CreateComponent<Light>();
-    light1->SetLightType(LIGHT_DIRECTIONAL);
-    light1->SetCastShadows(true);
-    light1->SetColor(Color(0.2, 0.2, 0.5));
-
-    Node* lightNode2 = scene_->CreateChild("Light");
-    lightNode2->SetRotation(Quaternion(135, 0, 0));
-    Light* light2 = lightNode2->CreateComponent<Light>();
-    light2->SetLightType(LIGHT_DIRECTIONAL);
-    light2->SetCastShadows(true);
-    light2->SetColor(Color(0.5, 0.2, 0.2));
-
-    Node* lightNode3 = scene_->CreateChild("Light");
-    lightNode3->SetRotation(Quaternion(135, 120, 0));
-    Light* light3 = lightNode3->CreateComponent<Light>();
-    light3->SetLightType(LIGHT_DIRECTIONAL);
-    light3->SetCastShadows(true);
-    light3->SetColor(Color(0.2, 0.5, 0.2));
-
-    Node* lightNode4 = scene_->CreateChild("Light");
-    lightNode4->SetRotation(Quaternion(135, 240, 0));
-    Light* light4 = lightNode4->CreateComponent<Light>();
-    light4->SetLightType(LIGHT_DIRECTIONAL);
-    light4->SetCastShadows(true);
-    light4->SetColor(Color(0.5, 0.5, 0.2));
+    Node* planetNode = scene_->CreateChild("Planet");
+    planetNode->LoadXML(cache->GetResource<XMLFile>("Prefabs/TestPlanet.xml")->GetRoot());
 }
 
 // ----------------------------------------------------------------------------

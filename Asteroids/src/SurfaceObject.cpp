@@ -50,8 +50,9 @@ void SurfaceObject::UpdatePlanetHeight(float offset)
 
     PhysicsRaycastResult result;
     phy->RaycastSingle(result, Ray(origin , direction), MAX_PLANET_RADIUS, COLLISION_MASK_PLANET_TERRAIN);
+    if (result.body_)
+        planetHeight_ = Max(1.0, (result.position_ - pivotPos).Length());
 
-    planetHeight_ = Max(1.0, (result.position_ - pivotPos).Length());
     node_->SetPosition(Vector3(0, planetHeight_ + offset, 0));
 }
 

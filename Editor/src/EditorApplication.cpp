@@ -25,7 +25,7 @@ void EditorApplication::Setup()
     engineParameters_[EP_WINDOW_RESIZABLE] = true;
     engineParameters_[EP_VSYNC]            = true;
     engineParameters_[EP_MULTI_SAMPLE]     = 2;
-    engineParameters_[EP_RESOURCE_PATHS]   = "CoreData;EditorData";
+    engineParameters_[EP_RESOURCE_PATHS]   = "CoreData;EditorData;Data;";
 }
 
 // ----------------------------------------------------------------------------
