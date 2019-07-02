@@ -22,6 +22,7 @@ bool UserRegistry::AddUser(const String& name, Connection* connection)
     if (existing != users_.End())
         return false;
     users_[name] = User(name, connection);
+
     return true;
 }
 
@@ -44,9 +45,21 @@ bool UserRegistry::RemoveUser(Connection* connection)
 }
 
 // ----------------------------------------------------------------------------
-UserRegistry::ConstIterator UserRegistry::GetUsers() const
+void UserRegistry::ClearAll()
 {
-    return users_.Begin();
+    users_.Clear();
+}
+
+// ----------------------------------------------------------------------------
+const User& UserRegistry::GetUser(const String& username) const
+{
+    return users_.Find(username)->second_;
+}
+
+// ----------------------------------------------------------------------------
+const UserRegistry::UsersType& UserRegistry::GetUsers() const
+{
+    return users_;
 }
 
 }

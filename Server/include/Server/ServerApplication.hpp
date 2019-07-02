@@ -21,7 +21,7 @@ public:
 private:
     void SubscribeToEvents();
     void LoadScene();
-    void HandleUserConnectedAndAuthorized(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleUserJoined(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;

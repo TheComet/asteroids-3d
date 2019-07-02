@@ -12,6 +12,9 @@ namespace Urho3D {
 
 namespace Asteroids {
 
+class ServerUserRegistry;
+class ClientUserRegistry;
+
 class ASTEROIDS_PUBLIC_API UserRegistry : public Urho3D::Object
 {
     URHO3D_OBJECT(UserRegistry, Urho3D::Object)
@@ -23,11 +26,16 @@ class ASTEROIDS_PUBLIC_API UserRegistry : public Urho3D::Object
 public:
     UserRegistry(Urho3D::Context* context);
 
-    bool AddUser(const Urho3D::String& name, Urho3D::Connection* connection);
-    bool RemoveUser(const Urho3D::String& name);
-    bool RemoveUser(Urho3D::Connection* connection);
     const User& GetUser(const Urho3D::String& name) const;
-    ConstIterator GetUsers() const;
+    const UsersType& GetUsers() const;
+
+private:
+    friend class ServerUserRegistry;
+    friend class ClientUserRegistry;
+    bool AddUser(const Urho3D::String& name, Urho3D::Connection* connection);
+    bool RemoveUser(Urho3D::Connection* connection);
+    bool RemoveUser(const Urho3D::String& name);
+    void ClearAll();
 
 private:
     UsersType users_;

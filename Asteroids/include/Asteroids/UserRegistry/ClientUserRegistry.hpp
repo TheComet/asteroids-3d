@@ -13,8 +13,9 @@ public:
     ClientUserRegistry(Urho3D::Context* context);
 
 private:
-    void HandleServerConnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleServerDisconnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleUserJoined(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleUserLeft(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleUserList(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 };
 
 }

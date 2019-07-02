@@ -3,30 +3,19 @@
 #include "Asteroids/Globals.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/Util/DebugTextScroll.hpp"
-#include "Asteroids/UserRegistry/UserRegistry.hpp"
 #include "Asteroids/UserRegistry/ServerUserRegistry.hpp"
+#include "Asteroids/UserRegistry/UserRegistry.hpp"
+#include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 
 #include <Urho3D/Core/CoreEvents.h>
-#include <Urho3D/Engine/DebugHud.h>
 #include <Urho3D/Engine/EngineDefs.h>
-#include <Urho3D/Graphics/Camera.h>
-#include <Urho3D/Graphics/DebugRenderer.h>
-#include <Urho3D/Graphics/Model.h>
 #include <Urho3D/Graphics/Octree.h>
-#include <Urho3D/Graphics/Renderer.h>
-#include <Urho3D/Graphics/StaticModel.h>
-#include <Urho3D/Graphics/Viewport.h>
-#include <Urho3D/Input/Input.h>
-#include <Urho3D/Input/InputEvents.h>
 #include <Urho3D/Network/Network.h>
 #include <Urho3D/Network/NetworkEvents.h>
-#include <Urho3D/Physics/CollisionShape.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
-#include <Urho3D/Physics/RigidBody.h>
 #include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/Scene/Scene.h>
-#include <Urho3D/UI/UI.h>
 
 using namespace Urho3D;
 
@@ -66,7 +55,16 @@ void ServerApplication::Start()
     SubscribeToEvents();
     LoadScene();
 
+    // Register events that can be sent over the network
     Network* network = GetSubsystem<Network>();
+    network->RegisterRemoteEvent(E_INVALIDUSERNAME);
+    network->RegisterRemoteEvent(E_USERNAMEALREADYEXISTS);
+    network->RegisterRemoteEvent(E_USERNAMETOOLONG);
+    network->RegisterRemoteEvent(E_USERJOINED);
+    network->RegisterRemoteEvent(E_USERLEFT);
+    network->RegisterRemoteEvent(E_USERLIST);
+
+    // Start server
     network->StartServer(6666);
 }
 
@@ -93,14 +91,21 @@ void ServerApplication::LoadScene()
 // ----------------------------------------------------------------------------
 void ServerApplication::SubscribeToEvents()
 {
+    SubscribeToEvent(E_USERJOINED, URHO3D_HANDLER(ServerApplication, HandleUserJoined));
 }
 
 // ----------------------------------------------------------------------------
-void ServerApplication::HandleUserConnectedAndAuthorized(StringHash eventType, VariantMap& eventData)
+void ServerApplication::HandleUserJoined(StringHash eventType, VariantMap& eventData)
 {
-    using namespace ClientConnected;
+    using namespace UserJoined;
 
-    //connection->SetScene(scene_);
+    URHO3D_LOGDEBUG("User joined! FUCK YOU");
+
+    String username = eventData[P_USERNAME].GetString();
+    const User& user = GetSubsystem<UserRegistry>()->GetUser(username);
+
+    assert(user.connection_ != nullptr);
+    user.connection_->SetScene(scene_);
 }
 
 }

@@ -1,6 +1,7 @@
 #include "Client/ClientApplication.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
+#include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 #include "Asteroids/UserRegistry/ClientUserRegistry.hpp"
 #include "Asteroids/Util/DebugTextScroll.hpp"
 
@@ -55,6 +56,8 @@ void ClientApplication::Start()
     context_->RegisterSubsystem<ClientUserRegistry>();
     context_->RegisterSubsystem<UserRegistry>();
 
+    Args args = ParseArgs();
+
 #if defined(DEBUG)
     context_->RegisterSubsystem<DebugTextScroll>();
     GetSubsystem<DebugTextScroll>()->SetTextCount(40);
@@ -100,8 +103,16 @@ void ClientApplication::Start()
     SubscribeToEvents();
 
     Network* network = GetSubsystem<Network>();
+    network->RegisterRemoteEvent(E_INVALIDUSERNAME);
+    network->RegisterRemoteEvent(E_USERNAMEALREADYEXISTS);
+    network->RegisterRemoteEvent(E_USERNAMETOOLONG);
+    network->RegisterRemoteEvent(E_USERJOINED);
+    network->RegisterRemoteEvent(E_USERLEFT);
+    network->RegisterRemoteEvent(E_USERLIST);
+
+    // Connect to server
     VariantMap identity;
-    identity["Username"] = String("TheComet");
+    identity["Username"] = args.username_;
     network->Connect("127.0.0.1", 6666, scene_, identity);
 }
 
@@ -109,6 +120,37 @@ void ClientApplication::Start()
 void ClientApplication::Stop()
 {
     GetSubsystem<Network>()->Disconnect();
+}
+
+// ----------------------------------------------------------------------------
+Args ClientApplication::ParseArgs()
+{
+    enum Expect
+    {
+        EXPECT_NONE,
+        EXPECT_NAME
+    } expected = EXPECT_NONE;
+
+    Args args;
+    for (const auto& arg : GetArguments())
+    {
+        switch (expected)
+        {
+            case EXPECT_NAME : {
+                args.username_ = arg;
+            } break;
+
+            case EXPECT_NONE : {
+                if (arg == "--username") expected = EXPECT_NAME;
+                else
+                {
+                    ErrorExit("Unknown argument " + arg);
+                }
+            } break;
+        }
+    }
+
+    return args;
 }
 
 // ----------------------------------------------------------------------------
