@@ -21,10 +21,7 @@ public:
 private:
     void SubscribeToEvents();
     void LoadScene();
-    void HandleClientConnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleClientDisconnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleClientIdentity(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleClientSceneLoaded(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleUserConnectedAndAuthorized(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;

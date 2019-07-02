@@ -1,4 +1,4 @@
-#include "Asteroids/Bullet.hpp"
+#include "Asteroids/Objects/Bullet.hpp"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/CoreEvents.h>

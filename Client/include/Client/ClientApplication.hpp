@@ -24,8 +24,6 @@ private:
 
     void HandleKeyDown(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandlePostRenderUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleServerConnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleServerDisconnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleConnectFailed(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
@@ -35,4 +33,3 @@ private:
 };
 
 }
-

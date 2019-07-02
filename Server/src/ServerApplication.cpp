@@ -1,10 +1,10 @@
 #include "Server/ServerApplication.hpp"
 #include "Server/SignalHandler.hpp"
-#include "Asteroids/AsteroidsLib.hpp"
-#include "Asteroids/Bullet.hpp"
-#include "Asteroids/DebugTextScroll.hpp"
 #include "Asteroids/Globals.hpp"
-#include "Asteroids/OrbitingCameraController.hpp"
+#include "Asteroids/AsteroidsLib.hpp"
+#include "Asteroids/Util/DebugTextScroll.hpp"
+#include "Asteroids/UserRegistry/UserRegistry.hpp"
+#include "Asteroids/UserRegistry/ServerUserRegistry.hpp"
 
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/DebugHud.h>
@@ -49,7 +49,11 @@ void ServerApplication::Setup()
 void ServerApplication::Start()
 {
     RegisterObjectFactories(context_);
+
     context_->RegisterSubsystem<SignalHandler>();
+    context_->RegisterSubsystem<UserRegistry>();
+    context_->RegisterSubsystem<ServerUserRegistry>();
+
 #if defined(DEBUG)
     GetSubsystem<Log>()->SetLevel(LOG_DEBUG);
 #endif
@@ -89,37 +93,14 @@ void ServerApplication::LoadScene()
 // ----------------------------------------------------------------------------
 void ServerApplication::SubscribeToEvents()
 {
-    SubscribeToEvent(E_CLIENTCONNECTED, URHO3D_HANDLER(ServerApplication, HandleClientConnected));
-    SubscribeToEvent(E_CLIENTDISCONNECTED, URHO3D_HANDLER(ServerApplication, HandleClientDisconnected));
-    SubscribeToEvent(E_CLIENTIDENTITY, URHO3D_HANDLER(ServerApplication, HandleClientIdentity));
-    SubscribeToEvent(E_CLIENTSCENELOADED, URHO3D_HANDLER(ServerApplication, HandleClientSceneLoaded));
 }
 
 // ----------------------------------------------------------------------------
-void ServerApplication::HandleClientConnected(StringHash eventType, VariantMap& eventData)
+void ServerApplication::HandleUserConnectedAndAuthorized(StringHash eventType, VariantMap& eventData)
 {
     using namespace ClientConnected;
 
-    Connection* connection = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
-    connection->SetScene(scene_);
-}
-
-// ----------------------------------------------------------------------------
-void ServerApplication::HandleClientDisconnected(StringHash eventType, VariantMap& eventData)
-{
-    using namespace ClientDisconnected;
-}
-
-// ----------------------------------------------------------------------------
-void ServerApplication::HandleClientIdentity(StringHash eventType, VariantMap& eventData)
-{
-    using namespace ClientIdentity;
-}
-
-// ----------------------------------------------------------------------------
-void ServerApplication::HandleClientSceneLoaded(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData)
-{
-    URHO3D_LOGDEBUGF("Client scene loaded");
+    //connection->SetScene(scene_);
 }
 
 }

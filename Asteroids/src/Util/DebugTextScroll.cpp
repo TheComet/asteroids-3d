@@ -1,4 +1,4 @@
-#include "Asteroids/DebugTextScroll.hpp"
+#include "Asteroids/Util/DebugTextScroll.hpp"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/CoreEvents.h>
@@ -21,12 +21,6 @@ DebugTextScroll::DebugTextScroll(Context* context) :
 {
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(DebugTextScroll, HandleUpdate));
     SubscribeToEvent(E_LOGMESSAGE, URHO3D_HANDLER(DebugTextScroll, HandleLogMessage));
-}
-
-// ----------------------------------------------------------------------------
-void DebugTextScroll::RegisterSubsystem(Context* context)
-{
-    context->RegisterSubsystem<DebugTextScroll>();
 }
 
 // ----------------------------------------------------------------------------

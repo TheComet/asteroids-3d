@@ -1,9 +1,9 @@
 #include "Asteroids/AsteroidsLib.hpp"
-#include "Asteroids/Bullet.hpp"
+#include "Asteroids/Objects/Bullet.hpp"
 #include "Asteroids/Globals.hpp"
-#include "Asteroids/ShipController.hpp"
-#include "Asteroids/ActionState.hpp"
-#include "Asteroids/ActionStateEvents.hpp"
+#include "Asteroids/Player/ShipController.hpp"
+#include "Asteroids/Player/ActionState.hpp"
+#include "Asteroids/Player/ActionStateEvents.hpp"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/CoreEvents.h>

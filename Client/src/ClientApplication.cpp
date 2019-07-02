@@ -1,11 +1,8 @@
 #include "Client/ClientApplication.hpp"
-#include "Asteroids/ActionState.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
-#include "Asteroids/Bullet.hpp"
-#include "Asteroids/DebugTextScroll.hpp"
-#include "Asteroids/Globals.hpp"
-#include "Asteroids/OrbitingCameraController.hpp"
-#include "Asteroids/ShipController.hpp"
+#include "Asteroids/UserRegistry/UserRegistry.hpp"
+#include "Asteroids/UserRegistry/ClientUserRegistry.hpp"
+#include "Asteroids/Util/DebugTextScroll.hpp"
 
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/DebugHud.h>
@@ -54,8 +51,12 @@ void ClientApplication::Setup()
 void ClientApplication::Start()
 {
     RegisterObjectFactories(context_);
+
+    context_->RegisterSubsystem<ClientUserRegistry>();
+    context_->RegisterSubsystem<UserRegistry>();
+
 #if defined(DEBUG)
-    DebugTextScroll::RegisterSubsystem(context_);
+    context_->RegisterSubsystem<DebugTextScroll>();
     GetSubsystem<DebugTextScroll>()->SetTextCount(40);
     GetSubsystem<DebugTextScroll>()->SetTimeout(10);
     CreateDebugHud();
@@ -99,12 +100,15 @@ void ClientApplication::Start()
     SubscribeToEvents();
 
     Network* network = GetSubsystem<Network>();
-    network->Connect("127.0.0.1", 6666, scene_);
+    VariantMap identity;
+    identity["Username"] = String("TheComet");
+    network->Connect("127.0.0.1", 6666, scene_, identity);
 }
 
 // ----------------------------------------------------------------------------
 void ClientApplication::Stop()
 {
+    GetSubsystem<Network>()->Disconnect();
 }
 
 // ----------------------------------------------------------------------------
@@ -122,8 +126,6 @@ void ClientApplication::SubscribeToEvents()
 {
     SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(ClientApplication, HandleKeyDown));
     SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(ClientApplication, HandlePostRenderUpdate));
-    SubscribeToEvent(E_SERVERCONNECTED, URHO3D_HANDLER(ClientApplication, HandleServerConnected));
-    SubscribeToEvent(E_SERVERDISCONNECTED, URHO3D_HANDLER(ClientApplication, HandleServerDisconnected));
     SubscribeToEvent(E_CONNECTFAILED, URHO3D_HANDLER(ClientApplication, HandleConnectFailed));
 }
 
@@ -169,25 +171,10 @@ void ClientApplication::HandlePostRenderUpdate(StringHash eventType, VariantMap&
 }
 
 // ----------------------------------------------------------------------------
-void ClientApplication::HandleServerConnected(StringHash eventType, VariantMap& eventData)
-{
-    using namespace ServerConnected;
-
-    URHO3D_LOGDEBUGF("Connected to server");
-}
-
-// ----------------------------------------------------------------------------
-void ClientApplication::HandleServerDisconnected(StringHash eventType, VariantMap& eventData)
-{
-    using namespace ServerDisconnected;
-
-    URHO3D_LOGDEBUGF("Disconnected from server");
-}
-
-// ----------------------------------------------------------------------------
 void ClientApplication::HandleConnectFailed(StringHash eventType, VariantMap& eventData)
 {
     using namespace ConnectFailed;
+    URHO3D_LOGDEBUGF("connection failed");
 }
 
 }

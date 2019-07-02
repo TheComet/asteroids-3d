@@ -1,10 +1,11 @@
-#include "Asteroids/ActionState.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
-#include "Asteroids/Asteroid.hpp"
-#include "Asteroids/Bullet.hpp"
-#include "Asteroids/DeviceInputMapper.hpp"
-#include "Asteroids/OrbitingCameraController.hpp"
-#include "Asteroids/ShipController.hpp"
+#include "Asteroids/Player/ActionState.hpp"
+#include "Asteroids/Player/DeviceInputMapper.hpp"
+#include "Asteroids/Player/OrbitingCameraController.hpp"
+#include "Asteroids/Player/ShipController.hpp"
+#include "Asteroids/Objects/Asteroid.hpp"
+#include "Asteroids/Objects/Bullet.hpp"
+#include "Asteroids/Network/NetworkShipState.hpp"
 
 #include <Urho3D/Core/Context.h>
 
@@ -21,8 +22,9 @@ void RegisterObjectFactories(Context* context)
     context->RegisterFactory<Bullet>(ASTEROIDS_CATEGORY);
     context->RegisterFactory<OrbitingCameraController>(ASTEROIDS_CATEGORY);
 
-    DeviceInputMapper::RegisterObject(context);
     ActionState::RegisterObject(context);
+    DeviceInputMapper::RegisterObject(context);
+    NetworkShipState::RegisterObject(context);
     ShipController::RegisterObject(context);
 }
 

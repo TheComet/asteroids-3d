@@ -11,19 +11,28 @@ test_visibility_macros (ASTEROIDS_API_EXPORT ASTEROIDS_API_IMPORT ASTEROIDS_API_
 
 configure_file ("templates/Config.hpp.in" "include/generated/Asteroids/Config.hpp")
 
-define_source_files(
+define_source_files (
     EXTRA_CPP_FILES
-        "src/ActionState.cpp"
-        "src/Asteroid.cpp"
         "src/AsteroidsLib.cpp"
-        "src/Bullet.cpp"
-        "src/DebugTextScroll.cpp"
-        "src/DeviceInputMapper.cpp"
-        "src/OrbitingCameraController.cpp"
-        "src/ShipController.cpp"
-        "src/SurfaceObject.cpp"
+        "src/Network/NetworkShipState.cpp"
+        "src/Objects/Asteroid.cpp"
+        "src/Objects/Bullet.cpp"
+        "src/Objects/SurfaceObject.cpp"
+        "src/Player/OrbitingCameraController.cpp"
+        "src/Player/ActionState.cpp"
+        "src/Player/ShipController.cpp"
+        "src/Player/DeviceInputMapper.cpp"
+        "src/UserRegistry/ClientUserRegistry.cpp"
+        "src/UserRegistry/ServerUserRegistry.cpp"
+        "src/UserRegistry/UserRegistry.cpp"
+        "src/Util/DebugTextScroll.cpp"
     GLOB_H_PATTERNS
-        "include/Asteroids/*.hpp")
+        "include/Asteroids/*.hpp"
+        "include/Asteroids/Network/*.hpp"
+        "include/Asteroids/Objects/*.hpp"
+        "include/Asteroids/Player/*.hpp"
+        "include/Asteroids/UserRegistry/*.hpp"
+        "include/Asteroids/Util/*.hpp")
 setup_library (${ASTEROIDS_LIB_TYPE})
 target_compile_definitions (${TARGET_NAME} PRIVATE ASTEROIDS_BUILDING)
 
@@ -31,4 +40,4 @@ install (TARGETS ${TARGET_NAME}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-set_output_directories(${CMAKE_RUNTIME_OUTPUT_DIRECTORY} LOCAL RUNTIME PDB)
+set_output_directories (${CMAKE_RUNTIME_OUTPUT_DIRECTORY} LOCAL RUNTIME PDB)

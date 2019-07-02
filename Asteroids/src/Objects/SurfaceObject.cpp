@@ -1,5 +1,5 @@
-#include "Asteroids/SurfaceObject.hpp"
 #include "Asteroids/Globals.hpp"
+#include "Asteroids/Objects/SurfaceObject.hpp"
 
 #include <Urho3D/Math/Ray.h>
 #include <Urho3D/Physics/PhysicsWorld.h>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Asteroids/Config.hpp"
-#include "Asteroids/SurfaceObject.hpp"
+#include "Asteroids/Objects/SurfaceObject.hpp"
 
 namespace Asteroids {
 

@@ -1,6 +1,6 @@
-#include "Asteroids/ActionState.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
-#include "Asteroids/DeviceInputMapper.hpp"
+#include "Asteroids/Player/ActionState.hpp"
+#include "Asteroids/Player/DeviceInputMapper.hpp"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Input/Input.h>

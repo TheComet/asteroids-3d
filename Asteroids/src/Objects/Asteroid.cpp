@@ -1,4 +1,4 @@
-#include "Asteroids/Asteroid.hpp"
+#include "Asteroids/Objects/Asteroid.hpp"
 
 using namespace Urho3D;
 

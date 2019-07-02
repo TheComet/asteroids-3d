@@ -14,8 +14,12 @@ public:
 
     static void RegisterObject(Urho3D::Context* context);
 
-    uint16_t GetState() const;
-    void SetState(uint16_t newState);
+    /*!
+     * Unlike Load() and Save(), these just read/write the input state bits.
+     * Required for networking.
+     */
+    bool LoadStateNet(Urho3D::Deserializer& deserializer);
+    bool SaveStateNet(Urho3D::Serializer& serializer) const;
 
     float GetLeft() const;
     void SetLeft(float value);
@@ -33,7 +37,8 @@ public:
     void SetUseItem(bool enable);
 
 private:
-    union State
+
+    union InputState
     {
         struct
         {
@@ -45,7 +50,7 @@ private:
             unsigned useItem : 1;
         } data;
         uint16_t u16;
-    } state_;
+    } inputState_;
 };
 
 }
