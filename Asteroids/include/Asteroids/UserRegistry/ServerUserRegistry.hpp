@@ -2,6 +2,7 @@
 
 #include "Asteroids/Config.hpp"
 #include <Urho3D/Core/Object.h>
+#include <Urho3D/IO/VectorBuffer.h>
 
 namespace Asteroids {
 
@@ -15,6 +16,8 @@ public:
 private:
     void HandleClientIdentity(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleClientDisconnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+
+    Urho3D::VectorBuffer msg_;
 };
 
 }

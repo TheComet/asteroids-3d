@@ -19,4 +19,12 @@ ASTEROIDS_PUBLIC_API extern const char* ASTEROIDS_CATEGORY;
  */
 ASTEROIDS_PUBLIC_API void RegisterObjectFactories(Urho3D::Context* context);
 
+/*!
+ * @brief Registers all network events that are sent remotely.
+ *
+ * Applications must call this before being able to communicate over the
+ * network.
+ */
+ASTEROIDS_PUBLIC_API void RegisterRemoteNetworkEvents(Urho3D::Context* context);
+
 }

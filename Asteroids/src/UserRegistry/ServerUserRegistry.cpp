@@ -1,6 +1,7 @@
 #include "Asteroids/UserRegistry/ServerUserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
+#include "Asteroids/Network/Protocol.hpp"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Network/Network.h>
@@ -34,20 +35,23 @@ void ServerUserRegistry::HandleClientIdentity(StringHash eventType, VariantMap& 
         URHO3D_LOGERROR("Empty username, rejecting");
         eventData[P_ALLOW] = false;
 
-        connection->SendRemoteEvent(E_INVALIDUSERNAME, true);
+        msg_.Clear();
+        msg_.WriteUByte(USERNAME_EMPTY);
+        connection->SendMessage(MSG_REGISTER_FAILED, true, false, msg_);
 
         return;
     }
 
     // Username might be too long
-    if (username.Length() > 50)
+    if (username.Length() > 32)
     {
         URHO3D_LOGERROR("Username exceeds maximum length, rejecting");
         eventData[P_ALLOW] = false;
 
-        VariantMap data;
-        data[UsernameTooLong::P_MAXLENGTH] = 50;
-        connection->SendRemoteEvent(E_USERNAMETOOLONG, true, data);
+        msg_.Clear();
+        msg_.WriteUByte(USERNAME_TOO_LONG);
+        msg_.WriteUByte(32);
+        connection->SendMessage(MSG_REGISTER_FAILED, true, false, msg_);
 
         return;
     }
@@ -67,16 +71,22 @@ void ServerUserRegistry::HandleClientIdentity(StringHash eventType, VariantMap& 
         URHO3D_LOGERRORF("Username \"%s\" already exists, rejecting", username.CString());
         eventData[P_ALLOW] = false;
 
-        connection->SendRemoteEvent(E_USERNAMEALREADYEXISTS, true);
+        msg_.Clear();
+        msg_.WriteUByte(USERNAME_ALREADY_TAKEN);
+        connection->SendMessage(MSG_REGISTER_FAILED, true, false, msg_);
 
         return;
     }
 
-    // Success, let everyone know a new user joined
+    // Success, let everyone know a new user joined. The event must be sent
+    // locally too, so the server can instantiate the player object.
     VariantMap data;
     data[UserJoined::P_USERNAME] = username;
     GetSubsystem<Network>()->BroadcastRemoteEvent(E_USERJOINED, true, data);
     SendEvent(E_USERJOINED, data);
+
+    // Let client know they were verified
+    connection->SendRemoteEvent(E_REGISTERSUCCEEDED, false);
 
     // Create vector of strings of all joined users
     StringVector users;
@@ -88,11 +98,6 @@ void ServerUserRegistry::HandleClientIdentity(StringHash eventType, VariantMap& 
     data.Clear();
     data[UserList::P_USERS] = users;
     connection->SendRemoteEvent(E_USERLIST, true, data);
-
-
-    URHO3D_LOGDEBUG("Current userlist:");
-    for (const auto& user : reg->GetUsers())
-        URHO3D_LOGDEBUGF(" -- %s", user.second_.username_.CString());
 }
 
 // ----------------------------------------------------------------------------
@@ -115,12 +120,8 @@ void ServerUserRegistry::HandleClientDisconnected(StringHash eventType, VariantM
         VariantMap& data = GetEventDataMap();
         data[UserLeft::P_USERNAME] = connection->GetIdentity()["Username"].GetString();
         GetSubsystem<Network>()->BroadcastRemoteEvent(E_USERLEFT, true, data);
+        SendEvent(E_USERLEFT, data);
     }
-
-
-    URHO3D_LOGDEBUG("Current userlist:");
-    for (const auto& user : reg->GetUsers())
-        URHO3D_LOGDEBUGF(" -- %s", user.second_.username_.CString());
 }
 
 }

@@ -1,9 +1,5 @@
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
-
 #include <Urho3D/Core/Context.h>
-#include <Urho3D/Network/NetworkEvents.h>
-#include <Urho3D/Network/Connection.h>
-#include <Urho3D/IO/Log.h>
 
 using namespace Urho3D;
 

@@ -8,4 +8,6 @@ static const unsigned COLLISION_MASK_PLAYERS         = 0x0004;
 
 static const float MAX_PLANET_RADIUS = 1000.0;
 
+static const unsigned short DEFAULT_PORT = 6666;
+
 }

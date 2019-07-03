@@ -1,8 +1,12 @@
+#include "Asteroids/Network/Protocol.hpp"
 #include "Asteroids/UserRegistry/ClientUserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 
 #include <Urho3D/IO/Log.h>
+#include <Urho3D/IO/MemoryBuffer.h>
+#include <Urho3D/Network/NetworkEvents.h>
+#include <Urho3D/Network/Network.h>
 
 using namespace Urho3D;
 
@@ -15,6 +19,76 @@ ClientUserRegistry::ClientUserRegistry(Context* context) :
     SubscribeToEvent(E_USERJOINED, URHO3D_HANDLER(ClientUserRegistry, HandleUserJoined));
     SubscribeToEvent(E_USERLEFT, URHO3D_HANDLER(ClientUserRegistry, HandleUserLeft));
     SubscribeToEvent(E_USERLIST, URHO3D_HANDLER(ClientUserRegistry, HandleUserList));
+}
+
+// ----------------------------------------------------------------------------
+void ClientUserRegistry::TryRegister(const String& name, const String& ipAddress, unsigned short port, Scene* scene)
+{
+    SubscribeToEvent(E_NETWORKMESSAGE, URHO3D_HANDLER(ClientUserRegistry, HandleNetworkMessage));
+    SubscribeToEvent(E_CONNECTFAILED, URHO3D_HANDLER(ClientUserRegistry, HandleConnectFailed));
+    SubscribeToEvent(E_SERVERDISCONNECTED, URHO3D_HANDLER(ClientUserRegistry, HandleServerDisconnected));
+
+    VariantMap identity;
+    identity["Username"] = name;
+    if (GetSubsystem<Network>()->Connect(ipAddress, port, scene, identity) == false)
+        NotifyRegisterFailed("Failed to initiate connection");
+}
+
+// ----------------------------------------------------------------------------
+void ClientUserRegistry::NotifyRegisterFailed(const String& reason)
+{
+    UnsubscribeFromEvent(E_NETWORKMESSAGE);
+    UnsubscribeFromEvent(E_CONNECTFAILED);
+    UnsubscribeFromEvent(E_SERVERDISCONNECTED);
+
+    VariantMap& eventData = GetEventDataMap();
+    eventData[RegisterFailed::P_REASON] = reason;
+    SendEvent(E_REGISTERFAILED, eventData);
+}
+
+// ----------------------------------------------------------------------------
+void ClientUserRegistry::HandleNetworkMessage(StringHash eventType, VariantMap& eventData)
+{
+    using namespace NetworkMessage;
+
+    if (eventData[P_MESSAGEID].GetInt() != MSG_REGISTER_FAILED)
+        return;
+
+    MemoryBuffer buffer(eventData[P_DATA].GetBuffer());
+    MsgRegisterFailed reason = static_cast<MsgRegisterFailed>(buffer.ReadUByte());
+    String reasonStr = "Unknown error";
+    switch (reason)
+    {
+        case USERNAME_TOO_LONG :
+            reasonStr = "Username exceeds " + String(static_cast<int>(buffer.ReadUByte())) + " characters";
+            break;
+
+        case USERNAME_EMPTY :
+            reasonStr = "Username is empty";
+            break;
+
+        case USERNAME_ALREADY_TAKEN :
+            reasonStr = "Username already taken";
+            break;
+
+        case USERNAME_BANNED :
+            reasonStr = "Username banned";
+            break;
+    }
+
+    NotifyRegisterFailed(reasonStr);
+}
+
+// ----------------------------------------------------------------------------
+void ClientUserRegistry::HandleConnectFailed(StringHash eventType, VariantMap& eventData)
+{
+    NotifyRegisterFailed("Failed to connect to server");
+}
+
+// ----------------------------------------------------------------------------
+void ClientUserRegistry::HandleServerDisconnected(StringHash eventType, VariantMap& eventData)
+{
+    NotifyRegisterFailed("Disconnected by server");
 }
 
 // ----------------------------------------------------------------------------
@@ -34,11 +108,6 @@ void ClientUserRegistry::HandleUserJoined(StringHash eventType, VariantMap& even
     {
         URHO3D_LOGERRORF("Failed to add received username \"%s\". This should not happen!", username.CString());
     }
-
-
-    URHO3D_LOGDEBUG("Current userlist:");
-    for (const auto& user : reg->GetUsers())
-        URHO3D_LOGDEBUGF(" -- %s", user.second_.username_.CString());
 }
 
 // ----------------------------------------------------------------------------
@@ -58,10 +127,6 @@ void ClientUserRegistry::HandleUserLeft(StringHash eventType, VariantMap& eventD
     {
         URHO3D_LOGERRORF("Failed to add received username \"%s\". This should not happen!", username.CString());
     }
-
-    URHO3D_LOGDEBUG("Current userlist:");
-    for (const auto& user : reg->GetUsers())
-        URHO3D_LOGDEBUGF(" -- %s", user.second_.username_.CString());
 }
 
 // ----------------------------------------------------------------------------
@@ -83,11 +148,6 @@ void ClientUserRegistry::HandleUserList(StringHash eventType, VariantMap& eventD
         {
             URHO3D_LOGERRORF("Failed to add received username \"%s\". This should not happen!", user.CString());
         }
-
-
-    URHO3D_LOGDEBUG("Current userlist:");
-    for (const auto& user : reg->GetUsers())
-        URHO3D_LOGDEBUGF(" -- %s", user.second_.username_.CString());
 }
 
 }

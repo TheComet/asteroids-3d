@@ -9,11 +9,6 @@ namespace Urho3D {
 
 namespace Asteroids {
 
-struct Args
-{
-    Urho3D::String username_;
-};
-
 class ClientApplication : public Urho3D::Application
 {
 public:
@@ -26,16 +21,23 @@ public:
 private:
     void SubscribeToEvents();
     void CreateDebugHud();
-    Args ParseArgs();
+    void ParseArgs();
 
     void HandleKeyDown(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandlePostRenderUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleConnectFailed(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleMainMenuQuit(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleConnectPromptRequestConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleRegisterSucceeded(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;
     Urho3D::SharedPtr<Urho3D::DebugHud> debugHud_;
     bool drawPhyGeometry_;
+
+    struct Args
+    {
+        Urho3D::String username_;
+    } args_;
 };
 
 }

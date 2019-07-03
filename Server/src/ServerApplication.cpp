@@ -38,6 +38,7 @@ void ServerApplication::Setup()
 void ServerApplication::Start()
 {
     RegisterObjectFactories(context_);
+    RegisterRemoteNetworkEvents(context_);
 
     context_->RegisterSubsystem<SignalHandler>();
     context_->RegisterSubsystem<UserRegistry>();
@@ -55,17 +56,8 @@ void ServerApplication::Start()
     SubscribeToEvents();
     LoadScene();
 
-    // Register events that can be sent over the network
-    Network* network = GetSubsystem<Network>();
-    network->RegisterRemoteEvent(E_INVALIDUSERNAME);
-    network->RegisterRemoteEvent(E_USERNAMEALREADYEXISTS);
-    network->RegisterRemoteEvent(E_USERNAMETOOLONG);
-    network->RegisterRemoteEvent(E_USERJOINED);
-    network->RegisterRemoteEvent(E_USERLEFT);
-    network->RegisterRemoteEvent(E_USERLIST);
-
     // Start server
-    network->StartServer(6666);
+    GetSubsystem<Network>()->StartServer(DEFAULT_PORT);
 }
 
 // ----------------------------------------------------------------------------
@@ -98,8 +90,6 @@ void ServerApplication::SubscribeToEvents()
 void ServerApplication::HandleUserJoined(StringHash eventType, VariantMap& eventData)
 {
     using namespace UserJoined;
-
-    URHO3D_LOGDEBUG("User joined! FUCK YOU");
 
     String username = eventData[P_USERNAME].GetString();
     const User& user = GetSubsystem<UserRegistry>()->GetUser(username);

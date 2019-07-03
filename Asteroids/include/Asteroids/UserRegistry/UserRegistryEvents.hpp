@@ -4,17 +4,14 @@
 
 namespace Asteroids {
 
-URHO3D_EVENT(E_INVALIDUSERNAME, InvalidUserName)
+// Gets sent when the server acknowledges you have joined successfully
+URHO3D_EVENT(E_REGISTERSUCCEEDED, RegisterSucceeded)
 {
 }
 
-URHO3D_EVENT(E_USERNAMETOOLONG, UsernameTooLong)
+URHO3D_EVENT(E_REGISTERFAILED, RegisterFailed)
 {
-    URHO3D_PARAM(P_MAXLENGTH, MaxLength);  // Integer
-}
-
-URHO3D_EVENT(E_USERNAMEALREADYEXISTS, UsernameAlreadyExists)
-{
+    URHO3D_PARAM(P_REASON, Reason);  // String
 }
 
 URHO3D_EVENT(E_USERJOINED, UserJoined)

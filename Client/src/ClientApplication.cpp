@@ -1,5 +1,7 @@
 #include "Client/ClientApplication.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
+#include "Asteroids/Menu/Menu.hpp"
+#include "Asteroids/Menu/MenuEvents.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 #include "Asteroids/UserRegistry/ClientUserRegistry.hpp"
@@ -41,6 +43,8 @@ ClientApplication::ClientApplication(Context* context) :
 // ----------------------------------------------------------------------------
 void ClientApplication::Setup()
 {
+    ParseArgs();
+
     engineParameters_[EP_LOG_NAME]         = "asteroids-client.log";
     engineParameters_[EP_FULL_SCREEN]      = false;
     engineParameters_[EP_WINDOW_RESIZABLE] = true;
@@ -52,11 +56,11 @@ void ClientApplication::Setup()
 void ClientApplication::Start()
 {
     RegisterObjectFactories(context_);
+    RegisterRemoteNetworkEvents(context_);
 
     context_->RegisterSubsystem<ClientUserRegistry>();
     context_->RegisterSubsystem<UserRegistry>();
-
-    Args args = ParseArgs();
+    context_->RegisterSubsystem<Menu>();
 
 #if defined(DEBUG)
     context_->RegisterSubsystem<DebugTextScroll>();
@@ -102,18 +106,7 @@ void ClientApplication::Start()
 
     SubscribeToEvents();
 
-    Network* network = GetSubsystem<Network>();
-    network->RegisterRemoteEvent(E_INVALIDUSERNAME);
-    network->RegisterRemoteEvent(E_USERNAMEALREADYEXISTS);
-    network->RegisterRemoteEvent(E_USERNAMETOOLONG);
-    network->RegisterRemoteEvent(E_USERJOINED);
-    network->RegisterRemoteEvent(E_USERLEFT);
-    network->RegisterRemoteEvent(E_USERLIST);
-
-    // Connect to server
-    VariantMap identity;
-    identity["Username"] = args.username_;
-    network->Connect("127.0.0.1", 6666, scene_, identity);
+    GetSubsystem<Menu>()->StartMainMenu();
 }
 
 // ----------------------------------------------------------------------------
@@ -123,7 +116,7 @@ void ClientApplication::Stop()
 }
 
 // ----------------------------------------------------------------------------
-Args ClientApplication::ParseArgs()
+void ClientApplication::ParseArgs()
 {
     enum Expect
     {
@@ -131,26 +124,29 @@ Args ClientApplication::ParseArgs()
         EXPECT_NAME
     } expected = EXPECT_NONE;
 
-    Args args;
     for (const auto& arg : GetArguments())
     {
         switch (expected)
         {
             case EXPECT_NAME : {
-                args.username_ = arg;
+                args_.username_ = arg;
+                expected = EXPECT_NONE;
             } break;
 
             case EXPECT_NONE : {
                 if (arg == "--username") expected = EXPECT_NAME;
                 else
                 {
-                    ErrorExit("Unknown argument " + arg);
+                    ErrorExit("Unknown option " + arg);
                 }
             } break;
         }
     }
 
-    return args;
+    if (expected != EXPECT_NONE)
+    {
+        ErrorExit("Missing argument to command line option");
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -168,7 +164,8 @@ void ClientApplication::SubscribeToEvents()
 {
     SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(ClientApplication, HandleKeyDown));
     SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(ClientApplication, HandlePostRenderUpdate));
-    SubscribeToEvent(E_CONNECTFAILED, URHO3D_HANDLER(ClientApplication, HandleConnectFailed));
+    SubscribeToEvent(E_MAINMENUQUIT, URHO3D_HANDLER(ClientApplication, HandleMainMenuQuit));
+    SubscribeToEvent(E_CONNECTPROMPTREQUESTCONNECT, URHO3D_HANDLER(ClientApplication, HandleConnectPromptRequestConnect));
 }
 
 // ----------------------------------------------------------------------------
@@ -177,10 +174,6 @@ void ClientApplication::HandleKeyDown(StringHash eventType, VariantMap& eventDat
     using namespace KeyDown;
 
     int key = eventData[P_KEY].GetInt();
-
-    // Exit game
-    if (key == KEY_ESCAPE)
-        engine_->Exit();
 
     if (key == KEY_F1)
         drawPhyGeometry_ = !drawPhyGeometry_;
@@ -213,10 +206,22 @@ void ClientApplication::HandlePostRenderUpdate(StringHash eventType, VariantMap&
 }
 
 // ----------------------------------------------------------------------------
-void ClientApplication::HandleConnectFailed(StringHash eventType, VariantMap& eventData)
+void ClientApplication::HandleMainMenuQuit(StringHash eventType, VariantMap& eventData)
 {
-    using namespace ConnectFailed;
-    URHO3D_LOGDEBUGF("connection failed");
+    engine_->Exit();
+}
+
+// ----------------------------------------------------------------------------
+void ClientApplication::HandleConnectPromptRequestConnect(StringHash eventType, VariantMap& eventData)
+{
+    using namespace ConnectPromptRequestConnect;
+
+    GetSubsystem<ClientUserRegistry>()->TryRegister(
+        eventData[P_USERNAME].GetString(),
+        eventData[P_ADDRESS].GetString(),
+        eventData[P_PORT].GetInt(),
+        scene_
+    );
 }
 
 }

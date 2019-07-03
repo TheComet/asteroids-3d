@@ -14,6 +14,10 @@ configure_file ("templates/Config.hpp.in" "include/generated/Asteroids/Config.hp
 define_source_files (
     EXTRA_CPP_FILES
         "src/AsteroidsLib.cpp"
+        "src/Menu/ConnectPrompt.cpp"
+        "src/Menu/Menu.cpp"
+        "src/Menu/MainMenu.cpp"
+        "src/Menu/MenuScreen.cpp"
         "src/Network/NetworkShipState.cpp"
         "src/Objects/Asteroid.cpp"
         "src/Objects/Bullet.cpp"
