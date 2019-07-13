@@ -5,6 +5,8 @@
 #include "Asteroids/Player/PlayerEvents.hpp"
 #include "Asteroids/Player/DeviceInputMapper.hpp"
 #include "Asteroids/Player/OrbitingCameraController.hpp"
+#include "Asteroids/Player/ClientShipState.hpp"
+#include "Asteroids/Player/ShipController.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 #include "Asteroids/UserRegistry/ClientUserRegistry.hpp"
@@ -235,16 +237,34 @@ void ClientApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eve
 {
     using namespace PlayerCreate;
     
-    if (eventData[P_USERID].GetInt() != myGuid_)
-        return;
+    User::GUID guid = eventData[P_USERID].GetUInt();
+    assert(shipNodes_.Find(guid) == shipNodes_.End());
+    User* user = GetSubsystem<UserRegistry>()->GetUser(guid);
 
     ResourceCache* cache = GetSubsystem<ResourceCache>();
-    XMLFile* xml = cache->GetResource<XMLFile>("Prefabs/ClientShip.xml");
+    XMLFile* config = cache->GetResource<XMLFile>("Prefabs/ClientShip.xml");
 
     Node* node = scene_->CreateChild("", LOCAL);
-    node->LoadXML(xml->GetRoot());
+    node->LoadXML(config->GetRoot());
+    node->SetRotation(eventData[P_PIVOTROTATION].GetQuaternion());
+    node->GetChild("Ship")->GetComponent<ClientShipState>()->SetUser(user);
     
-    cameraNode_->GetComponent<OrbitingCameraController>()->SetTrackNode(node->GetChild("Ship"));
+    shipNodes_[guid] = node;
+
+    if (eventData[P_USERID].GetInt() == myGuid_)
+        cameraNode_->GetComponent<OrbitingCameraController>()->SetTrackNode(node->GetChild("Ship"));
+}
+// ----------------------------------------------------------------------------
+void ClientApplication::HandlePlayerDestroy(StringHash eventType, VariantMap& eventData)
+{
+    using namespace PlayerDestroy;
+
+    User::GUID guid = eventData[P_USERID].GetUInt();
+
+    assert(shipNodes_.Find(guid) != shipNodes_.End());
+
+    shipNodes_[guid]->Remove();
+    shipNodes_.Erase(guid);
 }
 // ----------------------------------------------------------------------------
 void ClientApplication::HandleRegisterSucceeded(StringHash eventType, VariantMap& eventData)
@@ -253,10 +273,5 @@ void ClientApplication::HandleRegisterSucceeded(StringHash eventType, VariantMap
     myGuid_ = eventData[P_GUID].GetInt();
 }
 
-// ----------------------------------------------------------------------------
-void ClientApplication::HandlePlayerDestroy(StringHash eventType, VariantMap& eventData)
-{
-    using namespace PlayerDestroy;
-}
 
 }

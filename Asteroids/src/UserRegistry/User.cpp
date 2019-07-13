@@ -4,26 +4,28 @@ using namespace Urho3D;
 
 namespace Asteroids {
 
-static uint32_t guidCounter = 0;
+static User::GUID guidCounter = 0;
+static const User::GUID MAX_PLAYER_GUID = 0x7FFF;
+static const User::GUID MSB_BIT = 0x8000;
 
 // ----------------------------------------------------------------------------
-uint32_t GeneratePlayerGUID()
+User::GUID GeneratePlayerGUID()
 {
-    if (++guidCounter > 0x7FFFFFFF)
+    if (++guidCounter > MAX_PLAYER_GUID)
         guidCounter = 0;
     return guidCounter;
 }
 
 // ----------------------------------------------------------------------------
-uint32_t GenerateNonPlayerGUID()
+User::GUID GenerateNonPlayerGUID()
 {
-    return GeneratePlayerGUID() | 0x80000000;
+    return GeneratePlayerGUID() | MSB_BIT;
 }
 
 // ----------------------------------------------------------------------------
 User::User() :
     connection_(nullptr),
-    guid_(static_cast<uint32_t>(-1))
+    guid_(static_cast<GUID>(-1))
 {
 }
 
@@ -43,7 +45,7 @@ User::User(const String& username) :
 }
 
 // ----------------------------------------------------------------------------
-User::User(const Urho3D::String& username, uint32_t guid) :
+User::User(const Urho3D::String& username, GUID guid) :
     username_(username),
     connection_(nullptr),
     guid_(guid)
@@ -63,7 +65,7 @@ Connection* User::GetConnection() const
 }
 
 // ----------------------------------------------------------------------------
-uint32_t User::GetGUID() const
+User::GUID User::GetGUID() const
 {
     return guid_;
 }
@@ -71,7 +73,7 @@ uint32_t User::GetGUID() const
 // ----------------------------------------------------------------------------
 bool User::IsPlayerControlled() const
 {
-    return (guid_ & 0x80000000) != 0;
+    return (guid_ & MSB_BIT) != 0;
 }
 
 }

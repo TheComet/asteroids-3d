@@ -9,12 +9,15 @@ namespace Urho3D {
 
 namespace Asteroids {
 
-class ASTEROIDS_PUBLIC_API User
+class ASTEROIDS_PUBLIC_API User : public Urho3D::RefCounted
 {
 public:
+    typedef uint16_t GUID;
+    static const GUID INVALID_GUID = static_cast<GUID>(-1);
+
     /*!
      * @brief Creates an invalid user. Only exists because Urho3D containers
-     * need the default constructor to exist. The GUID will be (uint32_t)-1.
+     * need the default constructor to exist. The GUID will be (GUID)-1.
      */
     User();
 
@@ -29,7 +32,7 @@ public:
      * user or a non-player controlled user, depending on which range the GUID
      * is in). This is used by the client when receiving a E_USERJOINED event.
      */
-    User(const Urho3D::String& username, uint32_t guid);
+    User(const Urho3D::String& username, GUID guid);
 
     /*!
      * @brief Creates a non-player controlled user. Generates a unique ID.
@@ -39,14 +42,14 @@ public:
 
     const Urho3D::String& GetUsername() const;
     Urho3D::Connection* GetConnection() const;
-    uint32_t GetGUID() const;
+    GUID GetGUID() const;
 
     bool IsPlayerControlled() const;
 
 private:
     Urho3D::String username_;
     Urho3D::Connection* connection_;
-    uint32_t guid_;
+    GUID guid_;
 };
 
 }

@@ -2,9 +2,11 @@
 #include "Asteroids/Menu/ConnectPrompt.hpp"
 #include "Asteroids/Menu/MainMenu.hpp"
 #include "Asteroids/Player/ActionState.hpp"
+#include "Asteroids/Player/ClientShipState.hpp"
 #include "Asteroids/Player/DeviceInputMapper.hpp"
 #include "Asteroids/Player/OrbitingCameraController.hpp"
 #include "Asteroids/Player/PlayerEvents.hpp"
+#include "Asteroids/Player/ServerShipState.hpp"
 #include "Asteroids/Player/ShipController.hpp"
 #include "Asteroids/Objects/Asteroid.hpp"
 #include "Asteroids/Objects/Bullet.hpp"
@@ -31,6 +33,8 @@ void RegisterObjectFactories(Context* context)
     MainMenu::RegisterObject(context);
     OrbitingCameraController::RegisterObject(context);
     ShipController::RegisterObject(context);
+    ClientShipState::RegisterObject(context);
+    ServerShipState::RegisterObject(context);
 }
 
 // ----------------------------------------------------------------------------

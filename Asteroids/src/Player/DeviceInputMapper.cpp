@@ -17,14 +17,14 @@ namespace Asteroids {
 DeviceInputMapper::DeviceInputMapper (Context* context) :
     Component(context)
 {
-    SubscribeToEvent(E_JOYSTICKCONNECTED, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickConnected));
-    SubscribeToEvent(E_JOYSTICKDISCONNECTED, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickDisconnected));
-    SubscribeToEvent(E_JOYSTICKBUTTONDOWN, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickButtonDown));
-    SubscribeToEvent(E_JOYSTICKBUTTONUP, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickButtonUp));
-    SubscribeToEvent(E_JOYSTICKAXISMOVE, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickAxisMove));
-    SubscribeToEvent(E_JOYSTICKHATMOVE, URHO3D_HANDLER( DeviceInputMapper, HandleJoystickHatMove));
-    SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER( DeviceInputMapper, HandleKeyDown));
-    SubscribeToEvent(E_KEYUP, URHO3D_HANDLER( DeviceInputMapper, HandleKeyUp));
+    SubscribeToEvent(E_JOYSTICKCONNECTED, URHO3D_HANDLER(DeviceInputMapper, HandleJoystickConnected));
+    SubscribeToEvent(E_JOYSTICKDISCONNECTED, URHO3D_HANDLER(DeviceInputMapper, HandleJoystickDisconnected));
+    SubscribeToEvent(E_JOYSTICKBUTTONDOWN, URHO3D_HANDLER(DeviceInputMapper, HandleJoystickButtonDown));
+    SubscribeToEvent(E_JOYSTICKBUTTONUP, URHO3D_HANDLER(DeviceInputMapper, HandleJoystickButtonUp));
+    SubscribeToEvent(E_JOYSTICKAXISMOVE, URHO3D_HANDLER(DeviceInputMapper, HandleJoystickAxisMove));
+    SubscribeToEvent(E_JOYSTICKHATMOVE, URHO3D_HANDLER(DeviceInputMapper, HandleJoystickHatMove));
+    SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(DeviceInputMapper, HandleKeyDown));
+    SubscribeToEvent(E_KEYUP, URHO3D_HANDLER(DeviceInputMapper, HandleKeyUp));
 }
 
 // ----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ void DeviceInputMapper::SetConfig(Urho3D::XMLFile* mappingConfig)
 
     if (configFile_)
     {
-        SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER( DeviceInputMapper, HandleFileChanged));
+        SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER(DeviceInputMapper, HandleFileChanged));
         UpdateMappingFromConfig();
     }
 }

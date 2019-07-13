@@ -14,30 +14,30 @@ UserRegistry::UserRegistry(Context* context) :
 }
 
 // ----------------------------------------------------------------------------
-const User* UserRegistry::GetUser(Connection* connection) const
+User* UserRegistry::GetUser(Connection* connection) const
 {
     // Find user with this connection
     for (ConstIterator it = users_.Begin(); it != users_.End(); ++it)
-        if (it->second_.GetConnection() == connection)
-            return &it->second_;
+        if (it->second_->GetConnection() == connection)
+            return it->second_;
 
     assert(false);  // Server has a connection object that isn't registered? Should never happen
     return nullptr;
 }
 
 // ----------------------------------------------------------------------------
-const User* UserRegistry::GetUser(uint32_t guid) const
+User* UserRegistry::GetUser(User::GUID guid) const
 {
     assert(users_.Find(guid) != users_.End());
-    return &users_.Find(guid)->second_;
+    return users_.Find(guid)->second_;
 }
 
 // ----------------------------------------------------------------------------
-const User* UserRegistry::FindUser(const String& username) const
+User* UserRegistry::FindUser(const String& username) const
 {
     for (const auto& user : users_)
-        if (user.second_.GetUsername() == username)
-            return &user.second_;
+        if (user.second_->GetUsername() == username)
+            return user.second_;
     return nullptr;
 }
 
@@ -51,43 +51,53 @@ const UserRegistry::UsersType& UserRegistry::GetAllUsers() const
 bool UserRegistry::IsUsernameTaken(const String& name) const
 {
     for (const auto& user : users_)
-        if (user.second_.GetUsername() == name)
+        if (user.second_->GetUsername() == name)
             return true;
     return false;
 }
 
 // ----------------------------------------------------------------------------
-const User* UserRegistry::AddUser(const String& name, Connection* connection)
+User* UserRegistry::AddUser(const String& name, Connection* connection)
 {
-    User newUser(name, connection);
-    return &users_.Insert(MakePair(newUser.GetGUID(), newUser))->second_;
+    User* user = new User(name, connection);
+    users_[user->GetGUID()] = user;
+    return user;
 }
 
 // ----------------------------------------------------------------------------
-const User* UserRegistry::AddUser(const String& name, uint32_t guid)
+User* UserRegistry::AddUser(const String& name, User::GUID guid)
 {
     assert(users_.Find(guid) == users_.End());
-    User newUser(name, guid);
-    return &users_.Insert(MakePair(guid, newUser))->second_;
+    User* user = new User(name, guid);
+    users_[guid] = user;
+    return user;
 }
 
 // ----------------------------------------------------------------------------
-bool UserRegistry::RemoveUser(Connection* connection)
+SharedPtr<User> UserRegistry::RemoveUser(Connection* connection)
 {
     // Find user with this connection
     for (Iterator it = users_.Begin(); it != users_.End(); ++it)
-        if (it->second_.GetConnection() == connection)
+        if (it->second_->GetConnection() == connection)
         {
+            SharedPtr<User> user = it->second_;
             users_.Erase(it);
-            return true;
+            return user;
         }
-    return false;
+    return nullptr;
 }
 
 // ----------------------------------------------------------------------------
-bool UserRegistry::RemoveUser(uint32_t guid)
+SharedPtr<User> UserRegistry::RemoveUser(User::GUID guid)
 {
-    return users_.Erase(guid);
+    Iterator it = users_.Find(guid);
+    if (it != users_.End())
+    {
+        SharedPtr<User> user = it->second_;
+        users_.Erase(it);
+        return user;
+    }
+    return nullptr;
 }
 
 // ----------------------------------------------------------------------------
