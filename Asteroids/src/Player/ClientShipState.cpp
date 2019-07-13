@@ -57,8 +57,6 @@ void ClientShipState::HandleNetworkMessage(StringHash eventType, VariantMap& eve
     if ((signed char)(timeStep - lastTimeStep_) <= 0)
         return;
 
-    URHO3D_LOGDEBUGF("Updating player GUID: %d", guid);
-
     lastTimeStep_ = timeStep;
 
     Quaternion pivotRotation = buffer.ReadPackedQuaternion();

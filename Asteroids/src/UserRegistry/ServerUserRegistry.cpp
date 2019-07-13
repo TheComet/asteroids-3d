@@ -1,6 +1,7 @@
 #include "Asteroids/UserRegistry/ServerUserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
+#include "Asteroids/Player/PlayerEvents.hpp"
 #include "Asteroids/Network/Protocol.hpp"
 
 #include <Urho3D/Core/Context.h>
@@ -83,9 +84,17 @@ void ServerUserRegistry::HandleClientIdentity(StringHash eventType, VariantMap& 
     VariantMap data;
     for (const auto& user : reg->GetAllUsers())
     {
+        data.Clear();
         data[UserJoined::P_GUID] = user.second_->GetGUID();
         data[UserJoined::P_USERNAME] = user.second_->GetUsername();
         connection->SendRemoteEvent(E_USERJOINED, true, data);
+
+        // Temporary solution: Create all existing players by sending the new
+        // user E_PLAYERCREATE events.
+        data.Clear();
+        data[PlayerCreate::P_GUID] = user.second_->GetGUID();
+        data[PlayerCreate::P_PIVOTROTATION] = Quaternion::IDENTITY;
+        connection->SendRemoteEvent(E_PLAYERCREATE, true, data);
     }
 
     // Can add the user now to our registry

@@ -112,7 +112,7 @@ void ServerApplication::HandleUserJoined(StringHash eventType, VariantMap& event
     VariantMap data;
     data[PlayerCreate::P_GUID] = user->GetGUID();
     data[PlayerCreate::P_PIVOTROTATION] = Quaternion::IDENTITY;  // whatever lol
-    GetSubsystem<Network>()->BroadcastRemoteEvent(E_PLAYERCREATE, false, data);
+    GetSubsystem<Network>()->BroadcastRemoteEvent(E_PLAYERCREATE, true, data);
     SendEvent(E_PLAYERCREATE, data);
 }
 
@@ -125,7 +125,7 @@ void ServerApplication::HandleUserLeft(StringHash eventType, VariantMap& eventDa
     // later
     VariantMap data;
     data[PlayerDestroy::P_GUID] = eventData[P_GUID].GetInt();
-    GetSubsystem<Network>()->BroadcastRemoteEvent(E_PLAYERDESTROY, false, data);
+    GetSubsystem<Network>()->BroadcastRemoteEvent(E_PLAYERDESTROY, true, data);
     SendEvent(E_PLAYERDESTROY, data);
 }
 

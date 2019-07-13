@@ -242,18 +242,20 @@ void ClientApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eve
     User* user = GetSubsystem<UserRegistry>()->GetUser(guid);
 
     ResourceCache* cache = GetSubsystem<ResourceCache>();
-    XMLFile* config = cache->GetResource<XMLFile>("Prefabs/ClientShip.xml");
+    XMLFile* shipfab = cache->GetResource<XMLFile>(
+        guid == myGuid_ ? "Prefabs/ClientPlayerShip.xml" : "Prefabs/ClientRemoteShip.xml");
 
     Node* node = scene_->CreateChild("", LOCAL);
-    node->LoadXML(config->GetRoot());
+    node->LoadXML(shipfab->GetRoot());
     node->SetRotation(eventData[P_PIVOTROTATION].GetQuaternion());
     node->GetChild("Ship")->GetComponent<ClientShipState>()->SetUser(user);
 
     shipNodes_[guid] = node;
 
-    if (eventData[P_GUID].GetInt() == myGuid_)
+    if (guid == myGuid_)
         cameraNode_->GetComponent<OrbitingCameraController>()->SetTrackNode(node->GetChild("Ship"));
 }
+
 // ----------------------------------------------------------------------------
 void ClientApplication::HandlePlayerDestroy(StringHash eventType, VariantMap& eventData)
 {
@@ -266,12 +268,12 @@ void ClientApplication::HandlePlayerDestroy(StringHash eventType, VariantMap& ev
     shipNodes_[guid]->Remove();
     shipNodes_.Erase(guid);
 }
+
 // ----------------------------------------------------------------------------
 void ClientApplication::HandleRegisterSucceeded(StringHash eventType, VariantMap& eventData)
 {
     using namespace RegisterSucceeded;
     myGuid_ = eventData[P_GUID].GetInt();
 }
-
 
 }
