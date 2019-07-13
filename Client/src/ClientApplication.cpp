@@ -236,8 +236,8 @@ void ClientApplication::HandleConnectPromptRequestConnect(StringHash eventType, 
 void ClientApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eventData)
 {
     using namespace PlayerCreate;
-    
-    User::GUID guid = eventData[P_USERID].GetUInt();
+
+    User::GUID guid = eventData[P_GUID].GetUInt();
     assert(shipNodes_.Find(guid) == shipNodes_.End());
     User* user = GetSubsystem<UserRegistry>()->GetUser(guid);
 
@@ -248,10 +248,10 @@ void ClientApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eve
     node->LoadXML(config->GetRoot());
     node->SetRotation(eventData[P_PIVOTROTATION].GetQuaternion());
     node->GetChild("Ship")->GetComponent<ClientShipState>()->SetUser(user);
-    
+
     shipNodes_[guid] = node;
 
-    if (eventData[P_USERID].GetInt() == myGuid_)
+    if (eventData[P_GUID].GetInt() == myGuid_)
         cameraNode_->GetComponent<OrbitingCameraController>()->SetTrackNode(node->GetChild("Ship"));
 }
 // ----------------------------------------------------------------------------
@@ -259,7 +259,7 @@ void ClientApplication::HandlePlayerDestroy(StringHash eventType, VariantMap& ev
 {
     using namespace PlayerDestroy;
 
-    User::GUID guid = eventData[P_USERID].GetUInt();
+    User::GUID guid = eventData[P_GUID].GetUInt();
 
     assert(shipNodes_.Find(guid) != shipNodes_.End());
 

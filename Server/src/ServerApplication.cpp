@@ -110,7 +110,7 @@ void ServerApplication::HandleUserJoined(StringHash eventType, VariantMap& event
     // Send ship create event here for now. May have a spawning subsystem later
     // that determines where and when players are spawned
     VariantMap data;
-    data[PlayerCreate::P_USERID] = user->GetGUID();
+    data[PlayerCreate::P_GUID] = user->GetGUID();
     data[PlayerCreate::P_PIVOTROTATION] = Quaternion::IDENTITY;  // whatever lol
     GetSubsystem<Network>()->BroadcastRemoteEvent(E_PLAYERCREATE, false, data);
     SendEvent(E_PLAYERCREATE, data);
@@ -124,8 +124,8 @@ void ServerApplication::HandleUserLeft(StringHash eventType, VariantMap& eventDa
     // Send ship destroy event here for now. May have a spawning subsystem
     // later
     VariantMap data;
-    data[PlayerDestroy::P_USERID] = eventData[P_GUID].GetInt();
-    GetSubsystem<Network>()->BroadcastRemoteEvent(E_PLAYERDESTROY, false);
+    data[PlayerDestroy::P_GUID] = eventData[P_GUID].GetInt();
+    GetSubsystem<Network>()->BroadcastRemoteEvent(E_PLAYERDESTROY, false, data);
     SendEvent(E_PLAYERDESTROY, data);
 }
 
@@ -134,7 +134,7 @@ void ServerApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eve
 {
     using namespace PlayerCreate;
 
-    User::GUID guid = eventData[P_USERID].GetUInt();
+    User::GUID guid = eventData[P_GUID].GetUInt();
     assert(shipNodes_.Find(guid) == shipNodes_.End());
     User* user = GetSubsystem<UserRegistry>()->GetUser(guid);
 
@@ -154,7 +154,7 @@ void ServerApplication::HandlePlayerDestroy(StringHash eventType, VariantMap& ev
 {
     using namespace PlayerDestroy;
 
-    User::GUID guid = eventData[P_USERID].GetUInt();
+    User::GUID guid = eventData[P_GUID].GetUInt();
 
     assert(shipNodes_.Find(guid) != shipNodes_.End());
 

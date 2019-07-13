@@ -55,14 +55,9 @@ void ClientShipState::HandleNetworkMessage(StringHash eventType, VariantMap& eve
     // received
     uint8_t timeStep = buffer.ReadUByte();
     if ((signed char)(timeStep - lastTimeStep_) <= 0)
-    {
-        URHO3D_LOGDEBUGF("last: %d, current: %d -- skipping", lastTimeStep_, timeStep);
         return;
-    }
-    else
-    {
-        URHO3D_LOGDEBUGF("last: %d, current: %d", lastTimeStep_, timeStep);
-    }
+
+    URHO3D_LOGDEBUGF("Updating player GUID: %d", guid);
 
     lastTimeStep_ = timeStep;
 
@@ -73,7 +68,6 @@ void ClientShipState::HandleNetworkMessage(StringHash eventType, VariantMap& eve
     Node* pivot = node_->GetParent();
     pivot->SetRotation(pivotRotation);
     node_->SetRotation(Quaternion(0, shipAngle, 0));
-    node_->SetPosition(Vector3(0, 60, 0));
 }
 
 // ----------------------------------------------------------------------------
