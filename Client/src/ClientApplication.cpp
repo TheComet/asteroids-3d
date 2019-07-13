@@ -4,6 +4,7 @@
 #include "Asteroids/Menu/MenuEvents.hpp"
 #include "Asteroids/Player/PlayerEvents.hpp"
 #include "Asteroids/Player/DeviceInputMapper.hpp"
+#include "Asteroids/Player/OrbitingCameraController.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 #include "Asteroids/UserRegistry/ClientUserRegistry.hpp"
@@ -94,13 +95,12 @@ void ClientApplication::Start()
 #endif
 
     Node* cameraPivotNode = scene_->CreateChild("CameraPivot", LOCAL);
-    Node* cameraNode = cameraPivotNode->CreateChild("Camera", LOCAL);
-    cameraNode->SetPosition(Vector3(0, 160, 0));
-    cameraNode->SetRotation(Quaternion(90, 0, 0));
-    Camera* camera = cameraNode->CreateComponent<Camera>();
-    /*OrbitingCameraController* cameraController = cameraNode->CreateComponent<OrbitingCameraController>();
-    cameraController->SetDistance(90);
-    cameraController->SetTrackNode(player->GetNode());*/
+    cameraNode_ = cameraPivotNode->CreateChild("Camera", LOCAL);
+    cameraNode_->SetPosition(Vector3(0, 160, 0));
+    cameraNode_->SetRotation(Quaternion(90, 0, 0));
+    Camera* camera = cameraNode_->CreateComponent<Camera>();
+    OrbitingCameraController* cameraController = cameraNode_->CreateComponent<OrbitingCameraController>();
+    cameraController->SetConfig(cache->GetResource<XMLFile>("Config/Camera.xml"));
 
     Renderer* renderer = GetSubsystem<Renderer>();
     Viewport* viewport = new Viewport(context_, scene_, camera);
@@ -171,6 +171,7 @@ void ClientApplication::SubscribeToEvents()
     SubscribeToEvent(E_CONNECTPROMPTREQUESTCONNECT, URHO3D_HANDLER(ClientApplication, HandleConnectPromptRequestConnect));
     SubscribeToEvent(E_PLAYERCREATE, URHO3D_HANDLER(ClientApplication, HandlePlayerCreate));
     SubscribeToEvent(E_PLAYERDESTROY, URHO3D_HANDLER(ClientApplication, HandlePlayerDestroy));
+    SubscribeToEvent(E_REGISTERSUCCEEDED, URHO3D_HANDLER(ClientApplication, HandleRegisterSucceeded));
 }
 
 // ----------------------------------------------------------------------------
@@ -233,12 +234,23 @@ void ClientApplication::HandleConnectPromptRequestConnect(StringHash eventType, 
 void ClientApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eventData)
 {
     using namespace PlayerCreate;
+    
+    if (eventData[P_USERID].GetInt() != myGuid_)
+        return;
 
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     XMLFile* xml = cache->GetResource<XMLFile>("Prefabs/ClientShip.xml");
 
-    Node* node = scene_->CreateChild("Player", LOCAL);
+    Node* node = scene_->CreateChild("", LOCAL);
     node->LoadXML(xml->GetRoot());
+    
+    cameraNode_->GetComponent<OrbitingCameraController>()->SetTrackNode(node->GetChild("Ship"));
+}
+// ----------------------------------------------------------------------------
+void ClientApplication::HandleRegisterSucceeded(StringHash eventType, VariantMap& eventData)
+{
+    using namespace RegisterSucceeded;
+    myGuid_ = eventData[P_GUID].GetInt();
 }
 
 // ----------------------------------------------------------------------------

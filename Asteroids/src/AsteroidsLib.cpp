@@ -24,12 +24,12 @@ void RegisterObjectFactories(Context* context)
 {
     context->RegisterFactory<Asteroid>(ASTEROIDS_CATEGORY);
     context->RegisterFactory<Bullet>(ASTEROIDS_CATEGORY);
-    context->RegisterFactory<OrbitingCameraController>(ASTEROIDS_CATEGORY);
 
     ActionState::RegisterObject(context);
     ConnectPrompt::RegisterObject(context);
     DeviceInputMapper::RegisterObject(context);
     MainMenu::RegisterObject(context);
+    OrbitingCameraController::RegisterObject(context);
     ShipController::RegisterObject(context);
 }
 

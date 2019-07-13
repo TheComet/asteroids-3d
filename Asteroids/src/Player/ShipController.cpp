@@ -54,7 +54,7 @@ void ShipController::SetConfig(XMLFile* config)
     {
         SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(ShipController, HandleUpdate));
         SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER(ShipController, HandleFileChanged));
-        ReadShipConfig();
+        ParseShipConfig();
     }
 }
 
@@ -72,7 +72,7 @@ void ShipController::SetConfigAttr(const ResourceRef& value)
 }
 
 // ----------------------------------------------------------------------------
-void ShipController::ReadShipConfig()
+void ShipController::ParseShipConfig()
 {
     XMLElement ship = configFile_->GetRoot();
     for (XMLElement param = ship.GetChild("param"); param; param = param.GetNext("param"))
@@ -135,20 +135,7 @@ void ShipController::HandleUpdate(StringHash eventType, VariantMap& eventData)
         // Speed limit
         float currentSpeedSquared = velocity_.LengthSquared();
         if (currentSpeedSquared > shipConfig_.maxVelocity_ * shipConfig_.maxVelocity_)
-            velocity_ /= Sqrt(currentSpeedSquared) * shipConfig_.maxVelocity_;
-
-        /* TODO old implementation, remove
-        float angleOfTrajectory = Atan2(velocity_.y_, velocity_.x_);
-        float maxX = Cos(angleOfTrajectory) * shipConfig_.maxVelocity_;
-        float maxZ = Sin(angleOfTrajectory) * shipConfig_.maxVelocity_;
-        if (maxX > 0)
-            velocity_.x_ = Min(velocity_.x_, maxX);
-        else
-            velocity_.x_ = Max(velocity_.x_, maxX);
-        if (maxZ > 0)
-            velocity_.y_ = Min(velocity_.y_, maxZ);
-        else
-            velocity_.y_ = Max(velocity_.y_, maxZ);*/
+            velocity_ *=  shipConfig_.maxVelocity_ / Sqrt(currentSpeedSquared);
     }
     else
     {
@@ -190,7 +177,7 @@ void ShipController::HandleFileChanged(StringHash eventType, VariantMap& eventDa
 
     if (configFile_->GetName() == eventData[P_RESOURCENAME].GetString())
     {
-        ReadShipConfig();
+        ParseShipConfig();
     }
 }
 

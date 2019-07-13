@@ -1,0 +1,6 @@
+<cam>
+    <param name="camDistance" value="60" />
+    <param name="lookAheadDistance" value="5" />
+    <param name="camSmoothSpeed" value="2" />
+</cam>
+

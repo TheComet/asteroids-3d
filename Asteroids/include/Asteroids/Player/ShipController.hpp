@@ -28,7 +28,7 @@ public:
 
 private:
     void SubscribeToEvents();
-    void ReadShipConfig();
+    void ParseShipConfig();
     bool TryGetActionState();
     void HandleUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleActionWarp(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
