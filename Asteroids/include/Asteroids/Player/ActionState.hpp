@@ -9,17 +9,15 @@ class ASTEROIDS_PUBLIC_API ActionState : public Urho3D::Component
 {
     URHO3D_OBJECT(ActionState, Urho3D::Component);
 
+    typedef uint16_t Data;
+
 public:
     ActionState(Urho3D::Context* context);
 
     static void RegisterObject(Urho3D::Context* context);
 
-    /*!
-     * Unlike Load() and Save(), these just read/write the input state bits.
-     * Required for networking.
-     */
-    bool LoadStateNet(Urho3D::Deserializer& deserializer);
-    bool SaveStateNet(Urho3D::Serializer& serializer) const;
+    Data GetState() const;
+    void SetState(Data data);
 
     float GetLeft() const;
     void SetLeft(float value);

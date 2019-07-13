@@ -18,7 +18,6 @@ ClientUserRegistry::ClientUserRegistry(Context* context) :
 {
     SubscribeToEvent(E_USERJOINED, URHO3D_HANDLER(ClientUserRegistry, HandleUserJoined));
     SubscribeToEvent(E_USERLEFT, URHO3D_HANDLER(ClientUserRegistry, HandleUserLeft));
-    SubscribeToEvent(E_USERLIST, URHO3D_HANDLER(ClientUserRegistry, HandleUserList));
 }
 
 // ----------------------------------------------------------------------------
@@ -103,11 +102,9 @@ void ClientUserRegistry::HandleUserJoined(StringHash eventType, VariantMap& even
         return;
     }
 
+    uint32_t guid = eventData[P_GUID].GetUInt();
     String username = eventData[P_USERNAME].GetString();
-    if (reg->AddUser(username, nullptr) == false)
-    {
-        URHO3D_LOGERRORF("Failed to add received username \"%s\". This should not happen!", username.CString());
-    }
+    reg->AddUser(username, guid);
 }
 
 // ----------------------------------------------------------------------------
@@ -122,32 +119,8 @@ void ClientUserRegistry::HandleUserLeft(StringHash eventType, VariantMap& eventD
         return;
     }
 
-    String username = eventData[P_USERNAME].GetString();
-    if (reg->RemoveUser(username) == false)
-    {
-        URHO3D_LOGERRORF("Failed to add received username \"%s\". This should not happen!", username.CString());
-    }
-}
-
-// ----------------------------------------------------------------------------
-void ClientUserRegistry::HandleUserList(StringHash eventType, VariantMap& eventData)
-{
-    using namespace UserList;
-
-    UserRegistry* reg = GetSubsystem<UserRegistry>();
-    if (reg == nullptr)
-    {
-        URHO3D_LOGERROR("UserRegistry subsystem is not registered");
-        return;
-    }
-
-    const StringVector& users = eventData[P_USERS].GetStringVector();
-    reg->ClearAll();
-    for (const auto& user : users)
-        if (reg->AddUser(user, nullptr) == false)
-        {
-            URHO3D_LOGERRORF("Failed to add received username \"%s\". This should not happen!", user.CString());
-        }
+    uint32_t guid = eventData[P_GUID].GetUInt();
+    reg->RemoveUser(guid);
 }
 
 }

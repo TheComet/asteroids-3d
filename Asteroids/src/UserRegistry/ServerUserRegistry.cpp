@@ -66,7 +66,7 @@ void ServerUserRegistry::HandleClientIdentity(StringHash eventType, VariantMap& 
     }
 
     // Try to add the user. If the username already exists, reject
-    if (reg->AddUser(username, connection) == false)
+    if (reg->IsUsernameTaken(username))
     {
         URHO3D_LOGERRORF("Username \"%s\" already exists, rejecting", username.CString());
         eventData[P_ALLOW] = false;
@@ -78,26 +78,28 @@ void ServerUserRegistry::HandleClientIdentity(StringHash eventType, VariantMap& 
         return;
     }
 
-    // Success, let everyone know a new user joined. The event must be sent
-    // locally too, so the server can instantiate the player object.
+    // Let client know they were verified
+    connection->SendRemoteEvent(E_REGISTERSUCCEEDED, true);
+
+    // Send join events to the newly connected client for all current users
+    // so their list is in sync with ours
     VariantMap data;
-    data[UserJoined::P_USERNAME] = username;
+    for (const auto& user : reg->GetAllUsers())
+    {
+        data[UserJoined::P_GUID] = user.second_.GetGUID();
+        data[UserJoined::P_USERNAME] = user.second_.GetUsername();
+        connection->SendRemoteEvent(E_USERJOINED, true, data);
+    }
+
+    // Can add the user now to our registry
+    const User* user = reg->AddUser(username, connection);
+
+    // Let everyone know a new user joined. The event must be sent
+    // locally too, so the server can instantiate the player object.
+    data[UserJoined::P_GUID] = user->GetGUID();
+    data[UserJoined::P_USERNAME] = user->GetUsername();
     GetSubsystem<Network>()->BroadcastRemoteEvent(E_USERJOINED, true, data);
     SendEvent(E_USERJOINED, data);
-
-    // Let client know they were verified
-    connection->SendRemoteEvent(E_REGISTERSUCCEEDED, false);
-
-    // Create vector of strings of all joined users
-    StringVector users;
-    users.Reserve(reg->GetUsers().Size());
-    for (const auto& user : reg->GetUsers())
-        users.Push(user.second_.username_);
-
-    // Send list to client that just connected
-    data.Clear();
-    data[UserList::P_USERS] = users;
-    connection->SendRemoteEvent(E_USERLIST, true, data);
 }
 
 // ----------------------------------------------------------------------------
@@ -117,8 +119,9 @@ void ServerUserRegistry::HandleClientDisconnected(StringHash eventType, VariantM
     // Only send the event if the user exists before removal
     if (reg->RemoveUser(connection))
     {
+        User user("", connection);
         VariantMap& data = GetEventDataMap();
-        data[UserLeft::P_USERNAME] = connection->GetIdentity()["Username"].GetString();
+        data[UserLeft::P_GUID] = user.GetGUID();
         GetSubsystem<Network>()->BroadcastRemoteEvent(E_USERLEFT, true, data);
         SendEvent(E_USERLEFT, data);
     }

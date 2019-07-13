@@ -22,6 +22,7 @@ private:
     void SubscribeToEvents();
     void LoadScene();
     void HandleUserJoined(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleUserLeft(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;

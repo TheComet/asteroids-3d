@@ -6,18 +6,20 @@
 
 namespace Asteroids {
 
-class NetworkShipState : public Urho3D::Component
+class ServerShipState : public Urho3D::Component
 {
-    URHO3D_OBJECT(NetworkShipState, Urho3D::Component)
+    URHO3D_OBJECT(ServerShipState, Urho3D::Component)
 
 public:
-    NetworkShipState(Urho3D::Context* context);
+    ServerShipState(Urho3D::Context* context);
     static void RegisterObject(Urho3D::Context* context);
 
 private:
     void HandleNetworkMessage(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleNetworkUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
+private:
+    uint8_t lastTimeStep_;
     Urho3D::VectorBuffer msg_;
 };
 

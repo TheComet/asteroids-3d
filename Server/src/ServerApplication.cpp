@@ -91,11 +91,17 @@ void ServerApplication::HandleUserJoined(StringHash eventType, VariantMap& event
 {
     using namespace UserJoined;
 
-    String username = eventData[P_USERNAME].GetString();
-    const User& user = GetSubsystem<UserRegistry>()->GetUser(username);
+    uint32_t guid = eventData[P_GUID].GetUInt();
+    const User* user = GetSubsystem<UserRegistry>()->GetUser(guid);
 
-    assert(user.connection_ != nullptr);
-    user.connection_->SetScene(scene_);
+    assert(user->GetConnection() != nullptr);
+    user->GetConnection()->SetScene(scene_);
+}
+
+// ----------------------------------------------------------------------------
+void ServerApplication::HandleUserLeft(StringHash eventType, VariantMap& eventData)
+{
+    using namespace UserLeft;
 }
 
 }

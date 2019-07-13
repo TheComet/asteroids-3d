@@ -12,12 +12,20 @@ namespace Asteroids {
 class ASTEROIDS_PUBLIC_API User
 {
 public:
-    User() : connection_(nullptr) {}
-    User(Urho3D::String username, Urho3D::Connection* connection) :
-        username_(username), connection_(connection) {}
+    User();
+    User(const Urho3D::String& username, Urho3D::Connection* connection);
+    User(const Urho3D::String& username, uint32_t guid);
 
+    const Urho3D::String& GetUsername() const;
+    Urho3D::Connection* GetConnection() const;
+    uint32_t GetGUID() const;
+
+private:
     Urho3D::String username_;
-    Urho3D::Connection* connection_;
+    union {
+        Urho3D::Connection* connection_;
+        uint32_t guid_;
+    };
 };
 
 }

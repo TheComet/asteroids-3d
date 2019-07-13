@@ -7,7 +7,6 @@
 #include "Asteroids/Player/ShipController.hpp"
 #include "Asteroids/Objects/Asteroid.hpp"
 #include "Asteroids/Objects/Bullet.hpp"
-#include "Asteroids/Network/NetworkShipState.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 
 #include <Urho3D/Core/Context.h>
@@ -30,7 +29,6 @@ void RegisterObjectFactories(Context* context)
     ConnectPrompt::RegisterObject(context);
     DeviceInputMapper::RegisterObject(context);
     MainMenu::RegisterObject(context);
-    NetworkShipState::RegisterObject(context);
     ShipController::RegisterObject(context);
 }
 
@@ -42,7 +40,6 @@ void RegisterRemoteNetworkEvents(Context* context)
     network->RegisterRemoteEvent(E_REGISTERSUCCEEDED);
     network->RegisterRemoteEvent(E_USERJOINED);
     network->RegisterRemoteEvent(E_USERLEFT);
-    network->RegisterRemoteEvent(E_USERLIST);
 }
 
 }

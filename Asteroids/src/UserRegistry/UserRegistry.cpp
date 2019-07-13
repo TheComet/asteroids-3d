@@ -1,5 +1,7 @@
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
+
 #include <Urho3D/Core/Context.h>
+#include <Urho3D/Network/Connection.h>
 
 using namespace Urho3D;
 
@@ -12,50 +14,73 @@ UserRegistry::UserRegistry(Context* context) :
 }
 
 // ----------------------------------------------------------------------------
-bool UserRegistry::AddUser(const String& name, Connection* connection)
+const User* UserRegistry::GetUser(Connection* connection) const
 {
-    Iterator existing = users_.Find(name);
-    if (existing != users_.End())
-        return false;
-    users_[name] = User(name, connection);
-
-    return true;
+    assert(users_.Find(ToU32(connection)) != users_.End());
+    return &users_.Find(ToU32(connection))->second_;
 }
 
 // ----------------------------------------------------------------------------
-bool UserRegistry::RemoveUser(const String& name)
+const User* UserRegistry::GetUser(uint32_t guid) const
 {
-    return users_.Erase(name);
+    assert(users_.Find(guid) != users_.End());
+    return &users_.Find(guid)->second_;
+}
+
+// ----------------------------------------------------------------------------
+const User* UserRegistry::FindUser(const String& username) const
+{
+    for (const auto& user : users_)
+        if (user.second_.GetUsername() == username)
+            return &user.second_;
+    return nullptr;
+}
+
+// ----------------------------------------------------------------------------
+const UserRegistry::UsersType& UserRegistry::GetAllUsers() const
+{
+    return users_;
+}
+
+// ----------------------------------------------------------------------------
+bool UserRegistry::IsUsernameTaken(const String& name) const
+{
+    for (const auto& user : users_)
+        if (user.second_.GetUsername() == name)
+            return true;
+    return false;
+}
+
+// ----------------------------------------------------------------------------
+const User* UserRegistry::AddUser(const String& name, Connection* connection)
+{
+    assert(users_.Find(ToU32(connection)) == users_.End());
+    return &users_.Insert(MakePair(ToU32(connection), User(name, connection)))->second_;
+}
+
+// ----------------------------------------------------------------------------
+const User* UserRegistry::AddUser(const String& name, uint32_t guid)
+{
+    assert(users_.Find(guid) == users_.End());
+    return &users_.Insert(MakePair(guid, User(name, guid)))->second_;
 }
 
 // ----------------------------------------------------------------------------
 bool UserRegistry::RemoveUser(Connection* connection)
 {
-    for (Iterator it = users_.Begin(); it != users_.End(); ++it)
-        if (it->second_.connection_ == connection)
-        {
-            users_.Erase(it);
-            return true;
-        }
-    return false;
+    return users_.Erase(ToU32(connection));
+}
+
+// ----------------------------------------------------------------------------
+bool UserRegistry::RemoveUser(uint32_t guid)
+{
+    return users_.Erase(guid);
 }
 
 // ----------------------------------------------------------------------------
 void UserRegistry::ClearAll()
 {
     users_.Clear();
-}
-
-// ----------------------------------------------------------------------------
-const User& UserRegistry::GetUser(const String& username) const
-{
-    return users_.Find(username)->second_;
-}
-
-// ----------------------------------------------------------------------------
-const UserRegistry::UsersType& UserRegistry::GetUsers() const
-{
-    return users_;
 }
 
 }

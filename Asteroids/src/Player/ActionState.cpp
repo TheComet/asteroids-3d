@@ -24,9 +24,8 @@ void ActionState::RegisterObject(Urho3D::Context* context)
 }
 
 // ----------------------------------------------------------------------------
-bool ActionState::LoadStateNet(Deserializer& deserializer)
+void ActionState::SetState(Data newState)
 {
-    uint16_t newState = deserializer.ReadUShort();
     VariantMap& eventData = GetEventDataMap();
     uint16_t posEdge = newState & ~inputState_.u16;
 
@@ -34,13 +33,12 @@ bool ActionState::LoadStateNet(Deserializer& deserializer)
     if (posEdge & 0x8000) SendEvent(E_ACTIONUSEITEM, eventData);
 
     inputState_.u16 = newState;
-    return true;
 }
 
 // ----------------------------------------------------------------------------
-bool ActionState::SaveStateNet(Serializer& serializer) const
+ActionState::Data ActionState::GetState() const
 {
-    return serializer.WriteUShort(inputState_.u16);
+    return inputState_.u16;
 }
 
 // ----------------------------------------------------------------------------

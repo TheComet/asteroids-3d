@@ -26,7 +26,6 @@ private:
     void NotifyRegisterFailed(const Urho3D::String& reason);
     void HandleUserJoined(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleUserLeft(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleUserList(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 };
 
 }
