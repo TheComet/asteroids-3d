@@ -24,6 +24,9 @@ public:
      */
     void SetConfig(Urho3D::XMLFile* mappingConfig);
 
+    Urho3D::ResourceRef GetConfigAttr() const;
+    void SetConfigAttr(const Urho3D::ResourceRef& value);
+
 private:
     void HandleJoystickConnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleJoystickDisconnected(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);

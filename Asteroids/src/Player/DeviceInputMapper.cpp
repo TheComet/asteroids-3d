@@ -6,6 +6,7 @@
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/Input/InputEvents.h>
 #include <Urho3D/IO/Log.h>
+#include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Resource/ResourceEvents.h>
 
 using namespace Urho3D;
@@ -30,6 +31,21 @@ DeviceInputMapper::DeviceInputMapper (Context* context) :
 void DeviceInputMapper::RegisterObject(Context* context)
 {
     context->RegisterFactory<DeviceInputMapper>(ASTEROIDS_CATEGORY);
+
+    URHO3D_ACCESSOR_ATTRIBUTE("Input Map Config", GetConfigAttr, SetConfigAttr, ResourceRef, ResourceRef(XMLFile::GetTypeStatic()), AM_DEFAULT);
+}
+
+// ----------------------------------------------------------------------------
+ResourceRef DeviceInputMapper::GetConfigAttr() const
+{
+    return GetResourceRef(configFile_, XMLFile::GetTypeStatic());
+}
+
+// ----------------------------------------------------------------------------
+void DeviceInputMapper::SetConfigAttr(const ResourceRef& value)
+{
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+    SetConfig(cache->GetResource<XMLFile>(value.name_));
 }
 
 // ----------------------------------------------------------------------------
