@@ -3,6 +3,7 @@
 #include "Asteroids/Globals.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/Player/PlayerEvents.hpp"
+#include "Asteroids/Player/ServerShipState.hpp"
 #include "Asteroids/Util/DebugTextScroll.hpp"
 #include "Asteroids/UserRegistry/ServerUserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
@@ -58,7 +59,12 @@ void ServerApplication::Start()
     LoadScene();
 
     // Start server
-    GetSubsystem<Network>()->StartServer(DEFAULT_PORT);
+    Network* network = GetSubsystem<Network>();
+#if defined(DEBUG)
+    network->SetSimulatedLatency(200);
+    network->SetSimulatedPacketLoss(0.1);
+#endif
+    network->StartServer(DEFAULT_PORT);
 }
 
 // ----------------------------------------------------------------------------
@@ -85,6 +91,9 @@ void ServerApplication::LoadScene()
 void ServerApplication::SubscribeToEvents()
 {
     SubscribeToEvent(E_USERJOINED, URHO3D_HANDLER(ServerApplication, HandleUserJoined));
+    SubscribeToEvent(E_USERLEFT, URHO3D_HANDLER(ServerApplication, HandleUserLeft));
+    SubscribeToEvent(E_PLAYERCREATE, URHO3D_HANDLER(ServerApplication, HandlePlayerCreate));
+    SubscribeToEvent(E_PLAYERDESTROY, URHO3D_HANDLER(ServerApplication, HandlePlayerDestroy));
 }
 
 // ----------------------------------------------------------------------------
@@ -114,8 +123,43 @@ void ServerApplication::HandleUserLeft(StringHash eventType, VariantMap& eventDa
 
     // Send ship destroy event here for now. May have a spawning subsystem
     // later
+    VariantMap data;
+    data[PlayerDestroy::P_USERID] = eventData[P_GUID].GetInt();
     GetSubsystem<Network>()->BroadcastRemoteEvent(E_PLAYERDESTROY, false);
-    SendEvent(E_PLAYERDESTROY);
+    SendEvent(E_PLAYERDESTROY, data);
+}
+
+// ----------------------------------------------------------------------------
+void ServerApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eventData)
+{
+    using namespace PlayerCreate;
+
+    User::GUID guid = eventData[P_USERID].GetUInt();
+    assert(shipNodes_.Find(guid) == shipNodes_.End());
+    User* user = GetSubsystem<UserRegistry>()->GetUser(guid);
+
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+    XMLFile* config = cache->GetResource<XMLFile>("Prefabs/ServerShip.xml");
+
+    Node* node = scene_->CreateChild("", LOCAL);
+    node->LoadXML(config->GetRoot());
+    node->SetRotation(eventData[P_PIVOTROTATION].GetQuaternion());
+    node->GetChild("Ship")->GetComponent<ServerShipState>()->SetUser(user);
+
+    shipNodes_[guid] = node;
+}
+
+// ----------------------------------------------------------------------------
+void ServerApplication::HandlePlayerDestroy(StringHash eventType, VariantMap& eventData)
+{
+    using namespace PlayerDestroy;
+
+    User::GUID guid = eventData[P_USERID].GetUInt();
+
+    assert(shipNodes_.Find(guid) != shipNodes_.End());
+
+    shipNodes_[guid]->Remove();
+    shipNodes_.Erase(guid);
 }
 
 }

@@ -4,6 +4,8 @@
 #include "Asteroids/Menu/MenuEvents.hpp"
 #include "Asteroids/Player/PlayerEvents.hpp"
 #include "Asteroids/Player/DeviceInputMapper.hpp"
+#include "Asteroids/Player/ClientShipState.hpp"
+#include "Asteroids/Player/ShipController.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 #include "Asteroids/UserRegistry/ClientUserRegistry.hpp"
@@ -234,17 +236,32 @@ void ClientApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eve
 {
     using namespace PlayerCreate;
 
-    ResourceCache* cache = GetSubsystem<ResourceCache>();
-    XMLFile* xml = cache->GetResource<XMLFile>("Prefabs/ClientShip.xml");
+    User::GUID guid = eventData[P_USERID].GetUInt();
+    assert(shipNodes_.Find(guid) == shipNodes_.End());
+    User* user = GetSubsystem<UserRegistry>()->GetUser(guid);
 
-    Node* node = scene_->CreateChild("Player", LOCAL);
-    node->LoadXML(xml->GetRoot());
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+    XMLFile* config = cache->GetResource<XMLFile>("Prefabs/ClientShip.xml");
+
+    Node* node = scene_->CreateChild("", LOCAL);
+    node->LoadXML(config->GetRoot());
+    node->SetRotation(eventData[P_PIVOTROTATION].GetQuaternion());
+    node->GetChild("Ship")->GetComponent<ClientShipState>()->SetUser(user);
+
+    shipNodes_[guid] = node;
 }
 
 // ----------------------------------------------------------------------------
 void ClientApplication::HandlePlayerDestroy(StringHash eventType, VariantMap& eventData)
 {
     using namespace PlayerDestroy;
+
+    User::GUID guid = eventData[P_USERID].GetUInt();
+
+    assert(shipNodes_.Find(guid) != shipNodes_.End());
+
+    shipNodes_[guid]->Remove();
+    shipNodes_.Erase(guid);
 }
 
 }

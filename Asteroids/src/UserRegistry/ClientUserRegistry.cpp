@@ -102,7 +102,7 @@ void ClientUserRegistry::HandleUserJoined(StringHash eventType, VariantMap& even
         return;
     }
 
-    uint32_t guid = eventData[P_GUID].GetUInt();
+    User::GUID guid = eventData[P_GUID].GetUInt();
     String username = eventData[P_USERNAME].GetString();
     reg->AddUser(username, guid);
 }
@@ -119,7 +119,7 @@ void ClientUserRegistry::HandleUserLeft(StringHash eventType, VariantMap& eventD
         return;
     }
 
-    uint32_t guid = eventData[P_GUID].GetUInt();
+    User::GUID guid = eventData[P_GUID].GetUInt();
     reg->RemoveUser(guid);
 }
 

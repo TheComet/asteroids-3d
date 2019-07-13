@@ -1,10 +1,12 @@
 #pragma once
 
 #include <Urho3D/Engine/Application.h>
+#include "Asteroids/UserRegistry/User.hpp"
 
 namespace Urho3D {
     class DebugHud;
     class Scene;
+    class Node;
 }
 
 namespace Asteroids {
@@ -23,9 +25,12 @@ private:
     void LoadScene();
     void HandleUserJoined(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleUserLeft(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandlePlayerCreate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandlePlayerDestroy(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;
+    Urho3D::HashMap<User::GUID, Urho3D::Node*> shipNodes_;
 };
 
 }

@@ -39,5 +39,6 @@
 		<component type="DeviceInputMapper" id="16777233">
 			<attribute name="Input Map Config" value="XMLFile;Config/InputMap.xml" />
 		</component>
+		<component type="ClientShipState" id="16777234" />
 	</node>
 </node>

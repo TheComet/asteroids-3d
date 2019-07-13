@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Asteroids/UserRegistry/User.hpp"
 #include <Urho3D/Engine/Application.h>
 
 namespace Urho3D {
     class DebugHud;
     class Scene;
+    class Node;
 }
 
 namespace Asteroids {
@@ -33,6 +35,7 @@ private:
 private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;
     Urho3D::SharedPtr<Urho3D::DebugHud> debugHud_;
+    Urho3D::HashMap<User::GUID, Urho3D::Node*> shipNodes_;
     bool drawPhyGeometry_;
 
     struct Args
