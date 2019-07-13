@@ -78,21 +78,23 @@ void ServerUserRegistry::HandleClientIdentity(StringHash eventType, VariantMap& 
         return;
     }
 
-    // Let client know they were verified
-    connection->SendRemoteEvent(E_REGISTERSUCCEEDED, true);
-
     // Send join events to the newly connected client for all current users
     // so their list is in sync with ours
     VariantMap data;
     for (const auto& user : reg->GetAllUsers())
     {
-        data[UserJoined::P_GUID] = user.second_.GetGUID();
-        data[UserJoined::P_USERNAME] = user.second_.GetUsername();
+        data[UserJoined::P_GUID] = user.second_->GetGUID();
+        data[UserJoined::P_USERNAME] = user.second_->GetUsername();
         connection->SendRemoteEvent(E_USERJOINED, true, data);
     }
 
     // Can add the user now to our registry
     const User* user = reg->AddUser(username, connection);
+
+    // Let client know they were verified
+    data.Clear();
+    data[RegisterSucceeded::P_GUID] = user->GetGUID();
+    connection->SendRemoteEvent(E_REGISTERSUCCEEDED, true, data);
 
     // Let everyone know a new user joined. The event must be sent
     // locally too, so the server can instantiate the player object.
@@ -118,11 +120,11 @@ void ServerUserRegistry::HandleClientDisconnected(StringHash eventType, VariantM
     }
 
     // Only send the event if the user exists before removal
-    if (reg->RemoveUser(connection))
+    SharedPtr<User> user;
+    if ((user = reg->RemoveUser(connection)) != nullptr)
     {
-        User user("", connection);
         VariantMap& data = GetEventDataMap();
-        data[UserLeft::P_GUID] = user.GetGUID();
+        data[UserLeft::P_GUID] = user->GetGUID();
         GetSubsystem<Network>()->BroadcastRemoteEvent(E_USERLEFT, true, data);
         SendEvent(E_USERLEFT, data);
     }
