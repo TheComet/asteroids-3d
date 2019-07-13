@@ -16,8 +16,13 @@ UserRegistry::UserRegistry(Context* context) :
 // ----------------------------------------------------------------------------
 const User* UserRegistry::GetUser(Connection* connection) const
 {
-    assert(users_.Find(ToU32(connection)) != users_.End());
-    return &users_.Find(ToU32(connection))->second_;
+    // Find user with this connection
+    for (ConstIterator it = users_.Begin(); it != users_.End(); ++it)
+        if (it->second_.GetConnection() == connection)
+            return &it->second_;
+
+    assert(false);  // Server has a connection object that isn't registered? Should never happen
+    return nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -54,21 +59,29 @@ bool UserRegistry::IsUsernameTaken(const String& name) const
 // ----------------------------------------------------------------------------
 const User* UserRegistry::AddUser(const String& name, Connection* connection)
 {
-    assert(users_.Find(ToU32(connection)) == users_.End());
-    return &users_.Insert(MakePair(ToU32(connection), User(name, connection)))->second_;
+    User newUser(name, connection);
+    return &users_.Insert(MakePair(newUser.GetGUID(), newUser))->second_;
 }
 
 // ----------------------------------------------------------------------------
 const User* UserRegistry::AddUser(const String& name, uint32_t guid)
 {
     assert(users_.Find(guid) == users_.End());
-    return &users_.Insert(MakePair(guid, User(name, guid)))->second_;
+    User newUser(name, guid);
+    return &users_.Insert(MakePair(guid, newUser))->second_;
 }
 
 // ----------------------------------------------------------------------------
 bool UserRegistry::RemoveUser(Connection* connection)
 {
-    return users_.Erase(ToU32(connection));
+    // Find user with this connection
+    for (Iterator it = users_.Begin(); it != users_.End(); ++it)
+        if (it->second_.GetConnection() == connection)
+        {
+            users_.Erase(it);
+            return true;
+        }
+    return false;
 }
 
 // ----------------------------------------------------------------------------

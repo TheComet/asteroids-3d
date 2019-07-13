@@ -27,7 +27,8 @@ private:
     void HandlePostRenderUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleMainMenuQuit(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleConnectPromptRequestConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleRegisterSucceeded(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandlePlayerCreate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandlePlayerDestroy(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;

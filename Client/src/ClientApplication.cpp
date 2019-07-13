@@ -2,6 +2,8 @@
 #include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/Menu/Menu.hpp"
 #include "Asteroids/Menu/MenuEvents.hpp"
+#include "Asteroids/Player/PlayerEvents.hpp"
+#include "Asteroids/Player/DeviceInputMapper.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 #include "Asteroids/UserRegistry/ClientUserRegistry.hpp"
@@ -85,6 +87,7 @@ void ClientApplication::Start()
     GetSubsystem<Input>()->SetMouseVisible(true);
 
     scene_ = new Scene(context_);
+    scene_->CreateComponent<Octree>(LOCAL);
 
 #if defined(DEBUG)
     scene_->CreateComponent<DebugRenderer>();
@@ -166,6 +169,8 @@ void ClientApplication::SubscribeToEvents()
     SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(ClientApplication, HandlePostRenderUpdate));
     SubscribeToEvent(E_MAINMENUQUIT, URHO3D_HANDLER(ClientApplication, HandleMainMenuQuit));
     SubscribeToEvent(E_CONNECTPROMPTREQUESTCONNECT, URHO3D_HANDLER(ClientApplication, HandleConnectPromptRequestConnect));
+    SubscribeToEvent(E_PLAYERCREATE, URHO3D_HANDLER(ClientApplication, HandlePlayerCreate));
+    SubscribeToEvent(E_PLAYERDESTROY, URHO3D_HANDLER(ClientApplication, HandlePlayerDestroy));
 }
 
 // ----------------------------------------------------------------------------
@@ -222,6 +227,24 @@ void ClientApplication::HandleConnectPromptRequestConnect(StringHash eventType, 
         eventData[P_PORT].GetInt(),
         scene_
     );
+}
+
+// ----------------------------------------------------------------------------
+void ClientApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eventData)
+{
+    using namespace PlayerCreate;
+
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+    XMLFile* xml = cache->GetResource<XMLFile>("Prefabs/ClientShip.xml");
+
+    Node* node = scene_->CreateChild("Player", LOCAL);
+    node->LoadXML(xml->GetRoot());
+}
+
+// ----------------------------------------------------------------------------
+void ClientApplication::HandlePlayerDestroy(StringHash eventType, VariantMap& eventData)
+{
+    using namespace PlayerDestroy;
 }
 
 }

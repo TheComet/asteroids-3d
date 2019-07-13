@@ -2,6 +2,7 @@
 #include "Server/SignalHandler.hpp"
 #include "Asteroids/Globals.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
+#include "Asteroids/Player/PlayerEvents.hpp"
 #include "Asteroids/Util/DebugTextScroll.hpp"
 #include "Asteroids/UserRegistry/ServerUserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
@@ -73,8 +74,8 @@ void ServerApplication::LoadScene()
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
     scene_ = new Scene(context_);
-    scene_->CreateComponent<Octree>();
-    scene_->CreateComponent<PhysicsWorld>();
+    scene_->CreateComponent<Octree>(LOCAL);
+    scene_->CreateComponent<PhysicsWorld>(LOCAL);
 
     Node* planetNode = scene_->CreateChild("Planet");
     planetNode->LoadXML(cache->GetResource<XMLFile>("Prefabs/TestPlanet.xml")->GetRoot());
@@ -96,12 +97,25 @@ void ServerApplication::HandleUserJoined(StringHash eventType, VariantMap& event
 
     assert(user->GetConnection() != nullptr);
     user->GetConnection()->SetScene(scene_);
+
+    // Send ship create event here for now. May have a spawning subsystem later
+    // that determines where and when players are spawned
+    VariantMap data;
+    data[PlayerCreate::P_USERID] = user->GetGUID();
+    data[PlayerCreate::P_PIVOTROTATION] = Quaternion::IDENTITY;  // whatever lol
+    GetSubsystem<Network>()->BroadcastRemoteEvent(E_PLAYERCREATE, false, data);
+    SendEvent(E_PLAYERCREATE, data);
 }
 
 // ----------------------------------------------------------------------------
 void ServerApplication::HandleUserLeft(StringHash eventType, VariantMap& eventData)
 {
     using namespace UserLeft;
+
+    // Send ship destroy event here for now. May have a spawning subsystem
+    // later
+    GetSubsystem<Network>()->BroadcastRemoteEvent(E_PLAYERDESTROY, false);
+    SendEvent(E_PLAYERDESTROY);
 }
 
 }

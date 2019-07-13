@@ -35,8 +35,6 @@ private:
     friend class ServerUserRegistry;
     friend class ClientUserRegistry;
 
-    uint32_t ToU32(Urho3D::Connection* connection) const { return (uint32_t)(uintptr_t)connection; }
-
     bool IsUsernameTaken(const Urho3D::String& name) const;
     const User* AddUser(const Urho3D::String& name, uint32_t guid);
     const User* AddUser(const Urho3D::String& name, Urho3D::Connection* connection);

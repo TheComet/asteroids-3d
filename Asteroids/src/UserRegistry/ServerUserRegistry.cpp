@@ -96,6 +96,7 @@ void ServerUserRegistry::HandleClientIdentity(StringHash eventType, VariantMap& 
 
     // Let everyone know a new user joined. The event must be sent
     // locally too, so the server can instantiate the player object.
+    data.Clear();
     data[UserJoined::P_GUID] = user->GetGUID();
     data[UserJoined::P_USERNAME] = user->GetUsername();
     GetSubsystem<Network>()->BroadcastRemoteEvent(E_USERJOINED, true, data);

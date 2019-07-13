@@ -4,6 +4,7 @@
 #include "Asteroids/Player/ActionState.hpp"
 #include "Asteroids/Player/DeviceInputMapper.hpp"
 #include "Asteroids/Player/OrbitingCameraController.hpp"
+#include "Asteroids/Player/PlayerEvents.hpp"
 #include "Asteroids/Player/ShipController.hpp"
 #include "Asteroids/Objects/Asteroid.hpp"
 #include "Asteroids/Objects/Bullet.hpp"
@@ -40,6 +41,8 @@ void RegisterRemoteNetworkEvents(Context* context)
     network->RegisterRemoteEvent(E_REGISTERSUCCEEDED);
     network->RegisterRemoteEvent(E_USERJOINED);
     network->RegisterRemoteEvent(E_USERLEFT);
+    network->RegisterRemoteEvent(E_PLAYERCREATE);
+    network->RegisterRemoteEvent(E_PLAYERDESTROY);
 }
 
 }
