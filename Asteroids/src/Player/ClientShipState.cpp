@@ -1,6 +1,7 @@
 #include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/Player/ActionState.hpp"
 #include "Asteroids/Player/ClientShipState.hpp"
+#include "Asteroids/Player/ShipController.hpp"
 #include "Asteroids/Network/Protocol.hpp"
 
 #include <Urho3D/Core/Context.h>
@@ -65,7 +66,7 @@ void ClientShipState::HandleNetworkMessage(StringHash eventType, VariantMap& eve
     // TODO prediction. For now just take server state directly
     Node* pivot = node_->GetParent();
     pivot->SetRotation(pivotRotation);
-    node_->SetRotation(Quaternion(0, shipAngle, 0));
+    node_->GetComponent<ShipController>()->SetAngle(shipAngle);
 }
 
 // ----------------------------------------------------------------------------

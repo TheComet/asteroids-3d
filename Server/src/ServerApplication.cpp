@@ -60,7 +60,7 @@ void ServerApplication::Start()
 
     // Start server
     Network* network = GetSubsystem<Network>();
-#if defined(DEBUG)
+#if defined(DEBUG) && 0
     network->SetSimulatedLatency(200);
     network->SetSimulatedPacketLoss(0.1);
 #endif

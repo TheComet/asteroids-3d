@@ -253,7 +253,10 @@ void ClientApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eve
     shipNodes_[guid] = node;
 
     if (guid == myGuid_)
+    {
+        URHO3D_LOGDEBUGF("Tracking node of guid: %d", guid);
         cameraNode_->GetComponent<OrbitingCameraController>()->SetTrackNode(node->GetChild("Ship"));
+    }
 }
 
 // ----------------------------------------------------------------------------

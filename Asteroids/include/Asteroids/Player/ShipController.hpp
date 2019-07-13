@@ -26,6 +26,9 @@ public:
     Urho3D::ResourceRef GetConfigAttr() const;
     void SetConfigAttr(const Urho3D::ResourceRef& value);
 
+    float GetAngle() const;
+    void SetAngle(float angle);
+
 private:
     void SubscribeToEvents();
     void ParseShipConfig();

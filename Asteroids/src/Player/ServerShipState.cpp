@@ -8,6 +8,7 @@
 #include <Urho3D/IO/MemoryBuffer.h>
 #include <Urho3D/Network/NetworkEvents.h>
 #include <Urho3D/Network/Connection.h>
+#include <Urho3D/Network/Network.h>
 #include <Urho3D/Scene/Node.h>
 #include <Urho3D/IO/Log.h>
 
@@ -78,11 +79,10 @@ void ServerShipState::HandleNetworkUpdate(StringHash eventType, VariantMap& even
 
     msg_.Clear();
     msg_.WriteUShort(user_->GetGUID());
-
     msg_.WriteUByte(lastTimeStep_);
     msg_.WritePackedQuaternion(pivot->GetRotation());
-    msg_.WriteFloat(node_->GetRotation().EulerAngles().y_);
-    user_->GetConnection()->SendMessage(MSG_SERVER_SHIP_STATE, false, false, msg_);
+    msg_.WriteFloat(node_->GetComponent<ShipController>()->GetAngle());
+    GetSubsystem<Network>()->BroadcastMessage(MSG_SERVER_SHIP_STATE, false, false, msg_);
 }
 
 }

@@ -72,6 +72,18 @@ void ShipController::SetConfigAttr(const ResourceRef& value)
 }
 
 // ----------------------------------------------------------------------------
+float ShipController::GetAngle() const
+{
+    return angle_;
+}
+
+// ----------------------------------------------------------------------------
+void ShipController::SetAngle(float angle)
+{
+    angle_ = angle;
+}
+
+// ----------------------------------------------------------------------------
 void ShipController::ParseShipConfig()
 {
     XMLElement ship = configFile_->GetRoot();
