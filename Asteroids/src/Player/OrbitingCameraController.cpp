@@ -117,10 +117,8 @@ void OrbitingCameraController::HandleUpdate(StringHash eventType, VariantMap& ev
         return;
     }
 
-    const Vector3& camPos = node_->GetWorldPosition();
-    const Quaternion& camDir = node_->GetWorldRotation();
     const Vector3& trackPos = trackNode_->GetWorldPosition();
-    const Vector3& trackDir = trackNode_->GetWorldDirection();
+    const Quaternion& trackDir = trackNode_->GetWorldRotation();
 
     /*
     float r = trackPos.Length() + camConfig_.distance_;
@@ -133,11 +131,77 @@ void OrbitingCameraController::HandleUpdate(StringHash eventType, VariantMap& ev
         r*Sin(theta)*Sin(phi),
         r*Cos(theta)));
     */
-    
+    /*
+    const Vector3& rot = trackNode_->GetWorldDirection();
+        
     float r =  trackPos.Length();    
+    Quaternion q = Quaternion(Vector3::FORWARD, -trackPos.Normalized());
+    node_->SetTransform(trackPos/r*(r+camConfig_.distance_),q);    
+    */
+    
+    node_->GetParent()->SetWorldRotation(trackNode_->GetParent()->GetWorldRotation());
+    node_->SetRotation(trackNode_->GetRotation());
+    node_->SetPosition(Vector3(0,trackNode_->GetPosition().y_+camConfig_.distance_, 0));
+    node_->Rotate(Quaternion(90,90,90+node_->GetRotation().EulerAngles().y_));
+    
+    /*
+    Quaternion q;
+    Node *n = node_;
+    while(n) {
+        q = n->GetWorldRotation();;
+        URHO3D_LOGERRORF("CAM Pos %f %f %f", n->GetWorldPosition().x_, n->GetWorldPosition().y_, n->GetWorldPosition().z_);
+        URHO3D_LOGERRORF("CAM Deg %f %f %f", q.EulerAngles().x_, q.EulerAngles().y_, q.EulerAngles().z_);
+        q = n->GetRotation();;
+        URHO3D_LOGERRORF("CAM Local Pos %f %f %f", n->GetPosition().x_, n->GetPosition().y_, n->GetPosition().z_);
+        URHO3D_LOGERRORF("CAM Local Deg %f %f %f", q.EulerAngles().x_, q.EulerAngles().y_, q.EulerAngles().z_);
+        n=n->GetParent();
+    }
+
+    n = trackNode_;
+    while(n) {
+        q = n->GetWorldRotation();;
+        URHO3D_LOGERRORF("Ship Pos %f %f %f", n->GetWorldPosition().x_, n->GetWorldPosition().y_, n->GetWorldPosition().z_);
+        URHO3D_LOGERRORF("Ship Deg %f %f %f", q.EulerAngles().x_, q.EulerAngles().y_, q.EulerAngles().z_);
+        q = n->GetRotation();;
+        URHO3D_LOGERRORF("Ship Local Pos %f %f %f", n->GetPosition().x_, n->GetPosition().y_, n->GetPosition().z_);
+        URHO3D_LOGERRORF("Ship Local Deg %f %f %f", q.EulerAngles().x_, q.EulerAngles().y_, q.EulerAngles().z_);
+        n=n->GetParent();
+    }
+    */
+
+    /*
+    node_->SetWorldRotation(Quaternion(q.EulerAngles().x_,
+                                  q.EulerAngles().y_,
+                                  0
+                                 ));
+     */
+
+
+    /*
+//    node_->Rotate(Quaternion(0,0,-q.EulerAngles().z_), TransformSpace::TS_LOCAL);
+//    node_->Rotate(Quaternion(0,0,-trackNode_.EulerAngles().y_), TransformSpace::TS_LOCAL);
+    q = node_->GetWorldRotation();
+    static Quaternion old_q = Quaternion(0,0,0);
+    static int c = 100;
+    if (c--) {
+        URHO3D_LOGERRORF("%f %f %f", q.EulerAngles().x_-old_q.EulerAngles().x_, q.EulerAngles().y_-old_q.EulerAngles().y_, q.EulerAngles().z_-old_q.EulerAngles().z_);
+        old_q = q;
+        return;
+    }
+    c++;
+    
+    //URHO3D_LOGERRORF("%f %f %f %f", trackDir.w_, trackDir.x_,trackDir.y_,trackDir.z_);
     //URHO3D_LOGERRORF("%f %f %f", trackDir.x_,trackDir.y_,trackDir.z_);
-    node_->SetTransform(trackPos/r*(r+camConfig_.distance_),
-                        Quaternion(Vector3(0,0,1).Normalized(), -trackPos.Normalized()));
+    //URHO3D_LOGERRORF("%f %f %f", trackDir.EulerAngles().x_,trackDir.EulerAngles().y_,trackDir.EulerAngles().z_);
+    URHO3D_LOGINFOF("%f %f %f", q.EulerAngles().x_-old_q.EulerAngles().x_, q.EulerAngles().y_-old_q.EulerAngles().y_, q.EulerAngles().z_-old_q.EulerAngles().z_);
+    node_->Rotate(Quaternion(
+        q.EulerAngles().x_-old_q.EulerAngles().x_ < 90 ? 0: q.EulerAngles().x_-old_q.EulerAngles().x_,
+        q.EulerAngles().y_-old_q.EulerAngles().y_ < 90 ? 0: q.EulerAngles().y_-old_q.EulerAngles().y_,
+        q.EulerAngles().z_-old_q.EulerAngles().z_ < 90 ? 0: q.EulerAngles().z_-old_q.EulerAngles().z_), TransformSpace::TS_LOCAL);
+
+    q = node_->GetWorldRotation();
+    old_q=q;
+    */
     /*    
     float r =  trackPos.Length();    
     URHO3D_LOGERRORF("POS %f %f %f", trackPos.x_,trackPos.y_,trackPos.z_);
