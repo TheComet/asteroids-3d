@@ -66,7 +66,6 @@ void ServerShipState::HandleNetworkMessage(StringHash eventType, VariantMap& eve
     ActionState* actionState = GetComponent<ActionState>();
     ActionState::Data state = buffer.ReadUShort();
     actionState->SetState(state);
-    assert(GetComponent<ShipController>());
 }
 
 // ----------------------------------------------------------------------------

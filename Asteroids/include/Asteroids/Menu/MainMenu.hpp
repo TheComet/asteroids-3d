@@ -18,9 +18,9 @@ public:
 
 private:
     void LoadXMLAndInit();
-    void HandleConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleOptions(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleQuit(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleButtonConnectToServer(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleButtonOptions(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleButtonQuit(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleFileChanged(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleKeyDown(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 

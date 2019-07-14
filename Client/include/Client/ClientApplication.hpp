@@ -27,6 +27,7 @@ private:
     void ParseArgs();
 
     void HandleConnectPromptRequestConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleConnectPromptRequestCancel(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleKeyDown(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleMainMenuQuit(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandlePlayerCreate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);

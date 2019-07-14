@@ -172,6 +172,7 @@ void ClientApplication::SubscribeToEvents()
     SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(ClientApplication, HandlePostRenderUpdate));
     SubscribeToEvent(E_MAINMENUQUIT, URHO3D_HANDLER(ClientApplication, HandleMainMenuQuit));
     SubscribeToEvent(E_CONNECTPROMPTREQUESTCONNECT, URHO3D_HANDLER(ClientApplication, HandleConnectPromptRequestConnect));
+    SubscribeToEvent(E_CONNECTPROMPTREQUESTCANCEL, URHO3D_HANDLER(ClientApplication, HandleConnectPromptRequestCancel));
     SubscribeToEvent(E_PLAYERCREATE, URHO3D_HANDLER(ClientApplication, HandlePlayerCreate));
     SubscribeToEvent(E_PLAYERDESTROY, URHO3D_HANDLER(ClientApplication, HandlePlayerDestroy));
     SubscribeToEvent(E_REGISTERSUCCEEDED, URHO3D_HANDLER(ClientApplication, HandleRegisterSucceeded));
@@ -231,6 +232,12 @@ void ClientApplication::HandleConnectPromptRequestConnect(StringHash eventType, 
         eventData[P_PORT].GetInt(),
         scene_
     );
+}
+
+// ----------------------------------------------------------------------------
+void ClientApplication::HandleConnectPromptRequestCancel(StringHash eventType, VariantMap& eventData)
+{
+    GetSubsystem<Network>()->Disconnect();
 }
 
 // ----------------------------------------------------------------------------

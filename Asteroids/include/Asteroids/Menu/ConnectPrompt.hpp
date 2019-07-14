@@ -26,13 +26,13 @@ private:
     void LoadXMLAndInit();
     void SaveSettings();
     void LoadSettings();
-    void AttemptConnectToServer();
-    void CancelConnect();
+    void InitiateConnectionProcess();
+    void CancelConnectionProcess();
 
     // UI element events
     void HandleKeyDown(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleCancel(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleButtonCancel(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleButtonConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleTextChanged(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
     // UserRegistry and network events when attempting to connect
