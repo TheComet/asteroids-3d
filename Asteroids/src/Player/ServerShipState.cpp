@@ -83,6 +83,7 @@ void ServerShipState::HandleNetworkUpdate(StringHash eventType, VariantMap& even
     msg_.WriteUShort(user_->GetGUID());
     msg_.WriteUByte(lastTimeStep_);
     msg_.WritePackedQuaternion(pivot->GetRotation());
+    msg_.WriteFloat(node_->GetPosition().y_);
     msg_.WriteFloat(node_->GetComponent<ShipController>()->GetAngle());
     GetSubsystem<Network>()->BroadcastMessage(MSG_SERVER_SHIP_STATE, false, false, msg_);
 }

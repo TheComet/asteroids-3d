@@ -60,11 +60,13 @@ void ClientRemoteShipState::HandleNetworkMessage(StringHash eventType, VariantMa
     lastTimeStep_ = timeStep;
 
     Quaternion pivotRotation = buffer.ReadPackedQuaternion();
+    float planetHeight = buffer.ReadFloat();
     float shipAngle = buffer.ReadFloat();
 
     // TODO prediction. For now just take server state directly
     Node* pivot = node_->GetParent();
     pivot->SetRotation(pivotRotation);
+    node_->SetPosition(Vector3(0, planetHeight, 0));
     node_->SetRotation(Quaternion(0, shipAngle, 0));
 }
 
