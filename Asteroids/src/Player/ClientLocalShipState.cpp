@@ -61,6 +61,7 @@ void ClientLocalShipState::HandleNetworkMessage(StringHash eventType, VariantMap
     lastTimeStep_ = timeStep;
 
     Quaternion pivotRotation = buffer.ReadPackedQuaternion();
+    float planetHeight = buffer.ReadFloat();
     float shipAngle = buffer.ReadFloat();
 
     // TODO prediction. For now just take server state directly
