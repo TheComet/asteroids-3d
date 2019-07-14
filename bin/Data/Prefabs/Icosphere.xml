@@ -3,7 +3,7 @@
 	<attribute name="Is Enabled" value="true" />
 	<attribute name="Name" value="Icosphere" />
 	<attribute name="Tags" />
-	<attribute name="Position" value="3.18661 -56.6534 -31.8224" />
+	<attribute name="Position" value="0 0 0" />
 	<attribute name="Rotation" value="1 0 0 0" />
 	<attribute name="Scale" value="10 10 10" />
 	<attribute name="Variables" />
