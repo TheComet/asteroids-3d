@@ -157,14 +157,14 @@ void ConnectPrompt::InitiateConnectionProcess()
 {
     // Urho3D doesn't like multiple pending Network::Connect() calls. Disable
     // the connect button to prevent this
-    if (connect_->IsEnabled() == false)
+    if (IsLocked())
         return;
-    connect_->SetEnabled(false);
 
     if (port_->GetText().Length() == 0)
         port_->SetText(String(DEFAULT_PORT));
 
     SaveSettings();
+    LockInput();
     SubscribeToRegistryEvents();
 
     info_->SetText("Connecting to server...");
@@ -184,12 +184,45 @@ void ConnectPrompt::InitiateConnectionProcess()
 // ----------------------------------------------------------------------------
 void ConnectPrompt::CancelConnectionProcess()
 {
-    if (connect_->IsEnabled())
+    // If a connection is not in progress, then the cancel button acts as a
+    // "go back to previous screen" button. Otherwise it aborts the connection
+    // in progress
+    if (IsLocked() == false)
+    {
+        SendEvent(E_CONNECTPROMPTGOBACK);
         return;
-    connect_->SetEnabled(true);
+    }
 
+    info_->SetColor(Color::WHITE);
+    info_->SetText("Connection canceled");
+
+    UnlockInput();
     UnsubscribeFromRegistryEvents();
     SendEvent(E_CONNECTPROMPTREQUESTCANCEL);
+}
+
+// ----------------------------------------------------------------------------
+void ConnectPrompt::LockInput()
+{
+    connect_->SetEnabled(false);
+    username_->SetEnabled(false);
+    ipAddress_->SetEnabled(false);
+    port_->SetEnabled(false);
+}
+
+// ----------------------------------------------------------------------------
+void ConnectPrompt::UnlockInput()
+{
+    connect_->SetEnabled(true);
+    username_->SetEnabled(true);
+    ipAddress_->SetEnabled(true);
+    port_->SetEnabled(true);
+}
+
+// ----------------------------------------------------------------------------
+bool ConnectPrompt::IsLocked()
+{
+    return (connect_->IsEnabled() == false);
 }
 
 // ----------------------------------------------------------------------------
@@ -211,9 +244,9 @@ void ConnectPrompt::HandleKeyDown(StringHash eventType, VariantMap& eventData)
 
     switch (eventData[P_KEY].GetInt())
     {
-        case KEY_ESCAPE  : CancelConnectionProcess();
+        case KEY_ESCAPE  : CancelConnectionProcess(); break;
         case KEY_RETURN  :
-        case KEY_RETURN2 : InitiateConnectionProcess();
+        case KEY_RETURN2 : InitiateConnectionProcess(); break;
     }
 }
 
@@ -248,13 +281,12 @@ void ConnectPrompt::HandleRegisterFailed(StringHash eventType, VariantMap& event
     info_->SetText("Error: " + eventData[RegisterFailed::P_REASON].GetString());
     info_->SetColor(Color::RED);
     UnsubscribeFromRegistryEvents();
-    connect_->SetEnabled(true);
+    UnlockInput();
 }
 
 // ----------------------------------------------------------------------------
 void ConnectPrompt::HandleRegisterSucceeded(StringHash eventType, VariantMap& eventData)
 {
-    connect_->SetEnabled(true);
     UnsubscribeFromRegistryEvents();
     SendEvent(E_CONNECTPROMPTSUCCESS);
 }

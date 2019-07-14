@@ -61,6 +61,7 @@ void MainMenu::LoadXMLAndInit()
     UIElement* ui = LoadChildXML(xmlFile_->GetRoot(), cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
 
     Button* connect = GetUIChild<Button>(ui, "Button_Connect");
+    Button* host = GetUIChild<Button>(ui, "Button_Host");
     Button* options = GetUIChild<Button>(ui, "Button_Options");
     Button* quit = GetUIChild<Button>(ui, "Button_Quit");
 
@@ -68,6 +69,11 @@ void MainMenu::LoadXMLAndInit()
         SubscribeToEvent(connect, E_RELEASED, URHO3D_HANDLER(MainMenu, HandleButtonConnectToServer));
     else
         URHO3D_LOGERROR("Failed to get button Button_Connect");
+
+    if (host)
+        SubscribeToEvent(host, E_RELEASED, URHO3D_HANDLER(MainMenu, HandleButtonHost));
+    else
+        URHO3D_LOGERROR("Failed to get button Button_Host");
 
     if (options)
         SubscribeToEvent(options, E_RELEASED, URHO3D_HANDLER(MainMenu, HandleButtonOptions));
@@ -84,6 +90,13 @@ void MainMenu::LoadXMLAndInit()
 void MainMenu::HandleButtonConnectToServer(StringHash eventType, VariantMap& eventData)
 {
     SendEvent(E_MAINMENUCONNECT);
+}
+
+// ----------------------------------------------------------------------------
+void MainMenu::HandleButtonHost(StringHash eventType, VariantMap& eventData)
+{
+    SendEvent(E_MAINMENUHOST);
+    URHO3D_LOGERROR("Not implemented!");
 }
 
 // ----------------------------------------------------------------------------

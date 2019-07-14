@@ -19,6 +19,7 @@ public:
 private:
     void LoadXMLAndInit();
     void HandleButtonConnectToServer(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleButtonHost(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleButtonOptions(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleButtonQuit(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleFileChanged(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);

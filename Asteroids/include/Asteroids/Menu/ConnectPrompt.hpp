@@ -28,6 +28,9 @@ private:
     void LoadSettings();
     void InitiateConnectionProcess();
     void CancelConnectionProcess();
+    void LockInput();
+    void UnlockInput();
+    bool IsLocked();
 
     // UI element events
     void HandleKeyDown(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
