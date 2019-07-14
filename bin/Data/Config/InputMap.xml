@@ -19,6 +19,16 @@
         <action name="Warp" button="5" />
         <action name="UseItem" button="3" />
     </device>
+    <device name="Logitech Gamepad F310">
+        <action name="Left" axis="0" sign="-1" />
+        <action name="Left" hat="0" position="8" />
+        <action name="Right" axis="0" sign="1" />
+        <action name="Right" hat="0" position="2" />
+        <action name="Fire" button="0" />
+        <action name="Thrust" button="1" />
+        <action name="Warp" button="5" />
+        <action name="UseItem" button="3" />
+    </device>
     <device name="keyboard">
         <action name="Left" key="117" />
         <action name="Right" key="105" />

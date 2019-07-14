@@ -76,14 +76,14 @@ void ServerShipState::HandleNetworkUpdate(StringHash eventType, VariantMap& even
     if (user_.Expired())
         return;
 
-    URHO3D_LOGDEBUGF("guid: %d, node id: %d", user_->GetGUID(), node_->GetID());
-
     msg_.Clear();
     msg_.WriteUShort(user_->GetGUID());
     msg_.WriteUByte(lastTimeStep_);
     msg_.WritePackedQuaternion(pivot->GetRotation());
-    msg_.WriteFloat(node_->GetPosition().y_);
+    msg_.WriteFloat(node_->GetComponent<ShipController>()->GetOffsetFromPlanetCenter());
     msg_.WriteFloat(node_->GetComponent<ShipController>()->GetAngle());
+    URHO3D_LOGERRORF("Node pos: %f, %f, %f", node_->GetWorldPosition().x_, node_->GetWorldPosition().y_, node_->GetWorldPosition().z_);
+    URHO3D_LOGERRORF("planetHeight: %f", node_->GetComponent<ShipController>()->GetOffsetFromPlanetCenter());
     GetSubsystem<Network>()->BroadcastMessage(MSG_SERVER_SHIP_STATE, false, false, msg_);
 }
 

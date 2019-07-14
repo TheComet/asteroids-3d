@@ -7,6 +7,7 @@ namespace Urho3D {
     class DebugHud;
     class Scene;
     class Node;
+    class XMLFile;
 }
 
 namespace Asteroids {
@@ -27,9 +28,12 @@ private:
     void HandleUserLeft(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandlePlayerCreate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandlePlayerDestroy(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleFileChanged(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;
+    Urho3D::SharedPtr<Urho3D::XMLFile> planetXML_;
+    Urho3D::Node* planet_;
     Urho3D::HashMap<User::GUID, Urho3D::Node*> shipNodes_;
 };
 

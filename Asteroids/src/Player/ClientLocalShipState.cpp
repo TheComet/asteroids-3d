@@ -67,7 +67,8 @@ void ClientLocalShipState::HandleNetworkMessage(StringHash eventType, VariantMap
     // TODO prediction. For now just take server state directly
     Node* pivot = node_->GetParent();
     pivot->SetRotation(pivotRotation);
-    node_->GetComponent<ShipController>()->SetAngle(shipAngle);
+    node_->SetPosition(Vector3(0, planetHeight, 0));
+    node_->SetRotation(Quaternion(0, shipAngle, 0));
 }
 
 // ----------------------------------------------------------------------------

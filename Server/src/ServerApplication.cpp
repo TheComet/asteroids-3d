@@ -16,6 +16,7 @@
 #include <Urho3D/Network/NetworkEvents.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
 #include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Resource/ResourceEvents.h>
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/Scene/Scene.h>
 
@@ -83,8 +84,9 @@ void ServerApplication::LoadScene()
     scene_->CreateComponent<Octree>(LOCAL);
     scene_->CreateComponent<PhysicsWorld>(LOCAL);
 
-    Node* planetNode = scene_->CreateChild("Planet");
-    planetNode->LoadXML(cache->GetResource<XMLFile>("Prefabs/TestPlanet.xml")->GetRoot());
+    planet_ = scene_->CreateChild("Planet");
+    planetXML_ = cache->GetResource<XMLFile>("Prefabs/Icosphere.xml");
+    planet_->LoadXML(planetXML_->GetRoot());
 }
 
 // ----------------------------------------------------------------------------
@@ -94,6 +96,7 @@ void ServerApplication::SubscribeToEvents()
     SubscribeToEvent(E_USERLEFT, URHO3D_HANDLER(ServerApplication, HandleUserLeft));
     SubscribeToEvent(E_PLAYERCREATE, URHO3D_HANDLER(ServerApplication, HandlePlayerCreate));
     SubscribeToEvent(E_PLAYERDESTROY, URHO3D_HANDLER(ServerApplication, HandlePlayerDestroy));
+    SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER(ServerApplication, HandleFileChanged));
 }
 
 // ----------------------------------------------------------------------------
@@ -160,6 +163,18 @@ void ServerApplication::HandlePlayerDestroy(StringHash eventType, VariantMap& ev
 
     shipNodes_[guid]->Remove();
     shipNodes_.Erase(guid);
+}
+
+// ----------------------------------------------------------------------------
+void ServerApplication::HandleFileChanged(StringHash eventType, VariantMap& eventData)
+{
+    using namespace FileChanged;
+
+    if (eventData[P_RESOURCENAME].GetString() == planetXML_->GetName())
+    {
+        URHO3D_LOGDEBUGF("Reloading planet XML file %s", planetXML_->GetName().CString());
+        planet_->LoadXML(planetXML_->GetRoot());
+    }
 }
 
 }

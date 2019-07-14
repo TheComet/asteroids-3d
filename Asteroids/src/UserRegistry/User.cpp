@@ -4,7 +4,7 @@ using namespace Urho3D;
 
 namespace Asteroids {
 
-static User::GUID guidCounter = 0;
+static User::GUID guidCounter = 5;
 static const User::GUID MAX_PLAYER_GUID = 0x7FFF;
 static const User::GUID MSB_BIT = 0x8000;
 

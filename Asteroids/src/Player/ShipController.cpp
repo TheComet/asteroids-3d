@@ -169,6 +169,7 @@ void ShipController::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
     UpdatePosition(velocity_, dt);
     UpdatePlanetHeight();
+    node_->SetPosition(Vector3(0, GetOffsetFromPlanetCenter(), 0));
 }
 
 // ----------------------------------------------------------------------------
@@ -180,6 +181,7 @@ void ShipController::HandleActionWarp(StringHash eventType, VariantMap& eventDat
 // ----------------------------------------------------------------------------
 void ShipController::HandleActionUseItem(StringHash eventType, VariantMap& eventData)
 {
+    URHO3D_LOGDEBUG("UseItem action");
 }
 
 // ----------------------------------------------------------------------------

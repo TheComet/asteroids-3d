@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<material>
+	<technique name="Techniques/PBR/PBRDiff.xml" quality="0" loddistance="0" />
+</material>

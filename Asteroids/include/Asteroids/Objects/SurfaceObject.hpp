@@ -17,14 +17,15 @@ class ASTEROIDS_PUBLIC_API SurfaceObject : public Urho3D::Component
 public:
     SurfaceObject(Urho3D::Context* context);
 
-    float GetPlanetHeight() const;
+    float GetOffsetFromPlanetCenter() const;
 
 protected:
     void UpdatePosition(const Urho3D::Vector2& localLinearVelocity, float dt);
-    void UpdatePlanetHeight(float offset=0.0);
+    void UpdatePlanetHeight();
 
 private:
     float planetHeight_;
+    float surfaceOffset_;
 };
 
 }

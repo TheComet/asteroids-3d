@@ -16,7 +16,7 @@ namespace Asteroids {
 // ----------------------------------------------------------------------------
 Bullet::Bullet(Context* context) :
     SurfaceObject(context),
-    life_(1)
+    life_(100)
 {
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(Bullet, HandleUpdate));
 }
@@ -37,7 +37,7 @@ Bullet* Bullet::Create(Scene* scene, Quaternion pivotRotation, float angle)
     bulletModel->SetMaterial(cache->GetResource<Material>("Materials/DefaultGrey.xml"));
 
     Bullet* bullet = modelNode->CreateComponent<Bullet>();
-    bullet->SetLife(0.6);
+    bullet->SetLife(10);
     bullet->CalculateVelocity();
     bullet->UpdatePlanetHeight();
 
@@ -72,6 +72,7 @@ void Bullet::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
     UpdatePosition(velocity_, dt);
     UpdatePlanetHeight();
+    node_->SetPosition(Vector3(0, GetOffsetFromPlanetCenter(), 0));
 
     life_ -= dt;
     if (life_ < 0)

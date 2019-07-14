@@ -13,14 +13,15 @@ namespace Asteroids {
 // ----------------------------------------------------------------------------
 SurfaceObject::SurfaceObject(Context* context) :
     Component(context),
-    planetHeight_(1)
+    planetHeight_(1),
+    surfaceOffset_(0)
 {
 }
 
 // ----------------------------------------------------------------------------
-float SurfaceObject::GetPlanetHeight() const
+float SurfaceObject::GetOffsetFromPlanetCenter() const
 {
-    return planetHeight_;
+    return planetHeight_ + surfaceOffset_;
 }
 
 // ----------------------------------------------------------------------------
@@ -33,7 +34,7 @@ void SurfaceObject::UpdatePosition(const Vector2& localLinearVelocity, float dt)
 }
 
 // ----------------------------------------------------------------------------
-void SurfaceObject::UpdatePlanetHeight(float offset)
+void SurfaceObject::UpdatePlanetHeight()
 {
     Scene* scene;
     PhysicsWorld* phy;
@@ -52,8 +53,6 @@ void SurfaceObject::UpdatePlanetHeight(float offset)
     phy->RaycastSingle(result, Ray(origin , direction), MAX_PLANET_RADIUS, COLLISION_MASK_PLANET_TERRAIN);
     if (result.body_)
         planetHeight_ = Max(1.0, (result.position_ - pivotPos).Length());
-
-    node_->SetPosition(Vector3(0, planetHeight_ + offset, 0));
 }
 
 }

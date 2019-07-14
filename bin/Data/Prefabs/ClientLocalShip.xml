@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
-<node id="16777219">
+<node id="9">
 	<attribute name="Is Enabled" value="true" />
 	<attribute name="Name" value="Pivot" />
 	<attribute name="Tags" />
-	<attribute name="Position" value="0.011935 -0.969864 0.0986296" />
+	<attribute name="Position" value="0 0 0" />
 	<attribute name="Rotation" value="1 0 0 0" />
 	<attribute name="Scale" value="1 1 1" />
 	<attribute name="Variables" />
-	<node id="16777220">
+	<node id="16777218">
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="Ship" />
 		<attribute name="Tags" />
@@ -15,30 +15,28 @@
 		<attribute name="Rotation" value="1 0 0 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
-		<component type="AnimatedModel" id="16777235">
-			<attribute name="Model" value="Model;Models/TestShip.mdl" />
+		<component type="AnimatedModel" id="16777239">
+			<attribute name="Model" value="Model;Models/JackieShip.mdl" />
 			<attribute name="Material" value="Material;Materials/DefaultGrey.xml" />
 			<attribute name="Animation States">
 				<variant type="Int" value="0" />
 			</attribute>
 		</component>
-		<component type="CollisionShape" id="16777236">
-			<attribute name="Shape Type" value="Capsule" />
-			<attribute name="Size" value="1.78 3.08 1" />
-			<attribute name="Offset Position" value="0 1.07 0" />
-			<attribute name="Offset Rotation" value="0.707107 0.707107 0 0" />
+		<component type="CollisionShape" id="16777240">
+			<attribute name="Shape Type" value="TriangleMesh" />
+			<attribute name="Model" value="Model;Models/JackieShip.mdl" />
 		</component>
-		<component type="RigidBody" id="16777237">
-			<attribute name="Physics Position" value="0.011935 0.0301361 0.0986296" />
+		<component type="RigidBody" id="16777241">
+			<attribute name="Physics Position" value="0 1 0" />
 			<attribute name="Collision Layer" value="4" />
 		</component>
-		<component type="ActionState" id="16777238" />
-		<component type="ShipController" id="16777239">
+		<component type="ActionState" id="16777242" />
+		<component type="ShipController" id="16777243">
 			<attribute name="Ship Config" value="XMLFile;Config/Ship.xml" />
 		</component>
-		<component type="DeviceInputMapper" id="16777240">
+		<component type="DeviceInputMapper" id="16777244">
 			<attribute name="Input Map Config" value="XMLFile;Config/InputMap.xml" />
 		</component>
-		<component type="ClientLocalShipState" id="16777242" />
+		<component type="ClientLocalShipState" id="16777245" />
 	</node>
 </node>
