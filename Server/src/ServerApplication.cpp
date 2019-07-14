@@ -85,7 +85,7 @@ void ServerApplication::LoadScene()
     scene_->CreateComponent<PhysicsWorld>(LOCAL);
 
     planet_ = scene_->CreateChild("Planet");
-    planetXML_ = cache->GetResource<XMLFile>("Prefabs/Icosphere.xml");
+    planetXML_ = cache->GetResource<XMLFile>("Prefabs/ShizzlePlanet.xml");
     planet_->LoadXML(planetXML_->GetRoot());
 }
 

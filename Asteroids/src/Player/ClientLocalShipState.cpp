@@ -64,12 +64,6 @@ void ClientLocalShipState::HandleNetworkMessage(StringHash eventType, VariantMap
     float planetHeight = buffer.ReadFloat();
     float shipAngle = buffer.ReadFloat();
 
-    Quaternion q = pivotRotation;
-    Vector3 lp = node_->GetPosition();
-    URHO3D_LOGDEBUGF("pivot rotation: %f %f %f %f", q.w_, q.x_, q.y_, q.z_);
-    URHO3D_LOGDEBUGF("ship local pos: %f %f %f", lp.x_, lp.y_, lp.z_);
-    URHO3D_LOGDEBUGF("ship local rot: %f %f %f", lp.x_, lp.y_, lp.z_);
-
     // TODO prediction. For now just take server state directly
     Node* pivot = node_->GetParent();
     pivot->SetRotation(pivotRotation);

@@ -76,13 +76,6 @@ void ServerShipState::HandleNetworkUpdate(StringHash eventType, VariantMap& even
     if (user_.Expired())
         return;
 
-    Quaternion q = pivot->GetRotation();
-    Vector3 lp = node_->GetPosition();
-    Quaternion ql = node_->GetRotation();
-    URHO3D_LOGDEBUGF("pivot rotation: %f %f %f %f", q.w_, q.x_, q.y_, q.z_);
-    URHO3D_LOGDEBUGF("ship local pos: %f %f %f", lp.x_, lp.y_, lp.z_);
-    URHO3D_LOGDEBUGF("ship local rot: %f %f %f %f", ql.w_, ql.x_, ql.y_, ql.z_);
-
     msg_.Clear();
     msg_.WriteUShort(user_->GetGUID());
     msg_.WriteUByte(lastTimeStep_);
