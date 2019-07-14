@@ -21,7 +21,6 @@
 		</component>
 		<component type="CollisionShape" id="4" />
 		<component type="RigidBody" id="6">
-			<attribute name="Physics Position" value="3.18661 -56.6534 -31.8224" />
 			<attribute name="Collision Layer" value="2" />
 		</component>
 	</node>
@@ -68,9 +67,7 @@
 			<attribute name="Shape Type" value="Sphere" />
 			<attribute name="Size" value="16.5 1 1" />
 		</component>
-		<component type="RigidBody" id="11">
-			<attribute name="Physics Position" value="3.18661 -56.6534 -31.8224" />
-		</component>
+		<component type="RigidBody" id="11" />
 	</node>
 	<node id="7">
 		<attribute name="Is Enabled" value="true" />
