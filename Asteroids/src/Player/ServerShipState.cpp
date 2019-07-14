@@ -76,14 +76,19 @@ void ServerShipState::HandleNetworkUpdate(StringHash eventType, VariantMap& even
     if (user_.Expired())
         return;
 
+    Quaternion q = pivot->GetRotation();
+    Vector3 lp = node_->GetPosition();
+    Quaternion ql = node_->GetRotation();
+    URHO3D_LOGDEBUGF("pivot rotation: %f %f %f %f", q.w_, q.x_, q.y_, q.z_);
+    URHO3D_LOGDEBUGF("ship local pos: %f %f %f", lp.x_, lp.y_, lp.z_);
+    URHO3D_LOGDEBUGF("ship local rot: %f %f %f %f", ql.w_, ql.x_, ql.y_, ql.z_);
+
     msg_.Clear();
     msg_.WriteUShort(user_->GetGUID());
     msg_.WriteUByte(lastTimeStep_);
     msg_.WritePackedQuaternion(pivot->GetRotation());
     msg_.WriteFloat(node_->GetComponent<ShipController>()->GetOffsetFromPlanetCenter());
     msg_.WriteFloat(node_->GetComponent<ShipController>()->GetAngle());
-    URHO3D_LOGERRORF("Node pos: %f, %f, %f", node_->GetWorldPosition().x_, node_->GetWorldPosition().y_, node_->GetWorldPosition().z_);
-    URHO3D_LOGERRORF("planetHeight: %f", node_->GetComponent<ShipController>()->GetOffsetFromPlanetCenter());
     GetSubsystem<Network>()->BroadcastMessage(MSG_SERVER_SHIP_STATE, false, false, msg_);
 }
 

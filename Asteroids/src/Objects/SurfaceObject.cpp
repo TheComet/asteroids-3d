@@ -5,6 +5,7 @@
 #include <Urho3D/Physics/PhysicsWorld.h>
 #include <Urho3D/Physics/RigidBody.h>
 #include <Urho3D/Scene/Scene.h>
+#include <Urho3D/IO/Log.h>
 
 using namespace Urho3D;
 
@@ -36,10 +37,12 @@ void SurfaceObject::UpdatePosition(const Vector2& localLinearVelocity, float dt)
 // ----------------------------------------------------------------------------
 void SurfaceObject::UpdatePlanetHeight()
 {
-    Scene* scene;
-    PhysicsWorld* phy;
-    if ((scene = GetScene()) == nullptr || (phy = scene->GetComponent<PhysicsWorld>()) == nullptr)
+    Scene* scene = GetScene();
+    PhysicsWorld* phy = scene->GetComponent<PhysicsWorld>();
+    if (scene == nullptr || phy == nullptr)
     {
+        if (!scene) URHO3D_LOGWARNINGF("Scene is null");
+        if (!phy) URHO3D_LOGWARNINGF("PhysicsWorld is null");
         planetHeight_ = 1;
         return;
     }

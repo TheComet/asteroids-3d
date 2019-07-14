@@ -92,6 +92,7 @@ void ClientApplication::Start()
 
     scene_ = new Scene(context_);
     scene_->CreateComponent<Octree>(LOCAL);
+    scene_->CreateComponent<PhysicsWorld>(LOCAL);
 
 #if defined(DEBUG)
     scene_->CreateComponent<DebugRenderer>();

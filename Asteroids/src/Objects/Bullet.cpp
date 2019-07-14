@@ -33,10 +33,10 @@ Bullet* Bullet::Create(Scene* scene, Quaternion pivotRotation, float angle)
     pivotNode->SetRotation(pivotRotation);
 
     StaticModel* bulletModel = modelNode->CreateComponent<StaticModel>();
-    bulletModel->SetModel(cache->GetResource<Model>("Models/TestBullet.mdl"));
+    bulletModel->SetModel(cache->GetResource<Model>("Models/JackieProjectile.mdl"));
     bulletModel->SetMaterial(cache->GetResource<Material>("Materials/DefaultGrey.xml"));
 
-    Bullet* bullet = modelNode->CreateComponent<Bullet>();
+    Bullet* bullet = modelNode->CreateComponent<Bullet>(LOCAL);
     bullet->SetLife(10);
     bullet->CalculateVelocity();
     bullet->UpdatePlanetHeight();
