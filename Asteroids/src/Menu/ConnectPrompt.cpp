@@ -99,12 +99,12 @@ void ConnectPrompt::LoadXMLAndInit()
         URHO3D_LOGERROR("Failed to get UI element LineEdit_Port");
 
     if (cancel_)
-        SubscribeToEvent(cancel_, E_RELEASED, URHO3D_HANDLER(ConnectPrompt, HandleCancel));
+        SubscribeToEvent(cancel_, E_RELEASED, URHO3D_HANDLER(ConnectPrompt, HandleButtonCancel));
     else
         URHO3D_LOGERROR("Failed to get UI element Button_Cancel");
 
     if (connect_)
-        SubscribeToEvent(connect_, E_RELEASED, URHO3D_HANDLER(ConnectPrompt, HandleConnect));
+        SubscribeToEvent(connect_, E_RELEASED, URHO3D_HANDLER(ConnectPrompt, HandleButtonConnect));
     else
         URHO3D_LOGERROR("Failed to get UI element Button_Connect");
 
@@ -114,6 +114,8 @@ void ConnectPrompt::LoadXMLAndInit()
 // ----------------------------------------------------------------------------
 void ConnectPrompt::SaveSettings()
 {
+    // Save the previously typed in values to XML so we don't have to type in
+    // username/ip every time
     FileSystem* fs = GetSubsystem<FileSystem>();
     String url = fs->GetAppPreferencesDir("TheComet", "Asteroids");
     url.Append("ConnectPromptSettings.xml");
@@ -151,19 +153,26 @@ void ConnectPrompt::LoadSettings()
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::AttemptConnectToServer()
+void ConnectPrompt::InitiateConnectionProcess()
 {
-    connect_->SetEnabled(false);
+    // Urho3D doesn't like multiple pending Network::Connect() calls. Disable
+    // the connect button to prevent this
+    if (IsLocked())
+        return;
 
     if (port_->GetText().Length() == 0)
         port_->SetText(String(DEFAULT_PORT));
 
     SaveSettings();
+    LockInput();
     SubscribeToRegistryEvents();
 
     info_->SetText("Connecting to server...");
     info_->SetColor(Color::WHITE);
 
+    // The Network::Connect() call needs to be given a pointer to the scene,
+    // but we aren't responsible for managing the scene. Therefore, send an
+    // event requesting to be connected so another system can do it for us.
     using namespace ConnectPromptRequestConnect;
     VariantMap& eventData = GetEventDataMap();
     eventData[P_USERNAME] = username_->GetText();
@@ -173,24 +182,59 @@ void ConnectPrompt::AttemptConnectToServer()
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::CancelConnect()
+void ConnectPrompt::CancelConnectionProcess()
 {
-    GetSubsystem<Network>()->Disconnect();
-    connect_->SetEnabled(true);
+    // If a connection is not in progress, then the cancel button acts as a
+    // "go back to previous screen" button. Otherwise it aborts the connection
+    // in progress
+    if (IsLocked() == false)
+    {
+        SendEvent(E_CONNECTPROMPTGOBACK);
+        return;
+    }
+
+    info_->SetColor(Color::WHITE);
+    info_->SetText("Connection canceled");
+
+    UnlockInput();
     UnsubscribeFromRegistryEvents();
-    SendEvent(E_CONNECTPROMPTCANCEL);
+    SendEvent(E_CONNECTPROMPTREQUESTCANCEL);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::HandleCancel(StringHash eventType, VariantMap& eventData)
+void ConnectPrompt::LockInput()
 {
-    CancelConnect();
+    connect_->SetEnabled(false);
+    username_->SetEnabled(false);
+    ipAddress_->SetEnabled(false);
+    port_->SetEnabled(false);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::HandleConnect(StringHash eventType, VariantMap& eventData)
+void ConnectPrompt::UnlockInput()
 {
-    AttemptConnectToServer();
+    connect_->SetEnabled(true);
+    username_->SetEnabled(true);
+    ipAddress_->SetEnabled(true);
+    port_->SetEnabled(true);
+}
+
+// ----------------------------------------------------------------------------
+bool ConnectPrompt::IsLocked()
+{
+    return (connect_->IsEnabled() == false);
+}
+
+// ----------------------------------------------------------------------------
+void ConnectPrompt::HandleButtonCancel(StringHash eventType, VariantMap& eventData)
+{
+    CancelConnectionProcess();
+}
+
+// ----------------------------------------------------------------------------
+void ConnectPrompt::HandleButtonConnect(StringHash eventType, VariantMap& eventData)
+{
+    InitiateConnectionProcess();
 }
 
 // ----------------------------------------------------------------------------
@@ -200,9 +244,9 @@ void ConnectPrompt::HandleKeyDown(StringHash eventType, VariantMap& eventData)
 
     switch (eventData[P_KEY].GetInt())
     {
-        case KEY_ESCAPE  : CancelConnect(); break;
+        case KEY_ESCAPE  : CancelConnectionProcess(); break;
         case KEY_RETURN  :
-        case KEY_RETURN2 : AttemptConnectToServer(); break;
+        case KEY_RETURN2 : InitiateConnectionProcess(); break;
     }
 }
 
@@ -234,17 +278,15 @@ void ConnectPrompt::UnsubscribeFromRegistryEvents()
 // ----------------------------------------------------------------------------
 void ConnectPrompt::HandleRegisterFailed(StringHash eventType, VariantMap& eventData)
 {
-    using namespace RegisterFailed;
-    info_->SetText("Error: " + eventData[P_REASON].GetString());
+    info_->SetText("Error: " + eventData[RegisterFailed::P_REASON].GetString());
     info_->SetColor(Color::RED);
     UnsubscribeFromRegistryEvents();
-    connect_->SetEnabled(true);
+    UnlockInput();
 }
 
 // ----------------------------------------------------------------------------
 void ConnectPrompt::HandleRegisterSucceeded(StringHash eventType, VariantMap& eventData)
 {
-    connect_->SetEnabled(true);
     UnsubscribeFromRegistryEvents();
     SendEvent(E_CONNECTPROMPTSUCCESS);
 }

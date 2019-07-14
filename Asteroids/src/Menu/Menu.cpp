@@ -34,7 +34,7 @@ void Menu::StartMainMenu()
 
     SubscribeToEvent(mainMenu_, E_MAINMENUCONNECT, URHO3D_HANDLER(Menu, HandleMainMenuConnect));
     SubscribeToEvent(mainMenu_, E_MAINMENUQUIT, URHO3D_HANDLER(Menu, HandleMainMenuQuit));
-    SubscribeToEvent(connectPrompt_, E_CONNECTPROMPTCANCEL, URHO3D_HANDLER(Menu, HandleConnectPromptCancel));
+    SubscribeToEvent(connectPrompt_, E_CONNECTPROMPTGOBACK, URHO3D_HANDLER(Menu, HandleConnectPromptCancel));
     SubscribeToEvent(connectPrompt_, E_CONNECTPROMPTSUCCESS, URHO3D_HANDLER(Menu, HandleConnectPromptSuccess));
 }
 
