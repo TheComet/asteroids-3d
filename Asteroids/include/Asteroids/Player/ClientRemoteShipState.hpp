@@ -9,19 +9,18 @@ namespace Asteroids {
 
 class User;
 
-class ASTEROIDS_PUBLIC_API ClientShipState : public Urho3D::Component
+class ASTEROIDS_PUBLIC_API ClientRemoteShipState : public Urho3D::Component
 {
-    URHO3D_OBJECT(ClientShipState, Urho3D::Component)
+    URHO3D_OBJECT(ClientRemoteShipState, Urho3D::Component)
 
 public:
-    ClientShipState(Urho3D::Context* context);
+    ClientRemoteShipState(Urho3D::Context* context);
     static void RegisterObject(Urho3D::Context* context);
 
     void SetUser(User* user);
 
 private:
     void HandleNetworkMessage(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleNetworkUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
     Urho3D::VectorBuffer msg_;

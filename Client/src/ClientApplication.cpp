@@ -5,7 +5,8 @@
 #include "Asteroids/Player/PlayerEvents.hpp"
 #include "Asteroids/Player/DeviceInputMapper.hpp"
 #include "Asteroids/Player/OrbitingCameraController.hpp"
-#include "Asteroids/Player/ClientShipState.hpp"
+#include "Asteroids/Player/ClientLocalShipState.hpp"
+#include "Asteroids/Player/ClientRemoteShipState.hpp"
 #include "Asteroids/Player/ShipController.hpp"
 #include "Asteroids/UserRegistry/UserRegistry.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
@@ -243,19 +244,22 @@ void ClientApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eve
 
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     XMLFile* shipfab = cache->GetResource<XMLFile>(
-        guid == myGuid_ ? "Prefabs/ClientPlayerShip.xml" : "Prefabs/ClientRemoteShip.xml");
+        guid == myGuid_ ? "Prefabs/ClientLocalShip.xml" : "Prefabs/ClientRemoteShip.xml");
 
     Node* node = scene_->CreateChild("", LOCAL);
     node->LoadXML(shipfab->GetRoot());
     node->SetRotation(eventData[P_PIVOTROTATION].GetQuaternion());
-    node->GetChild("Ship")->GetComponent<ClientShipState>()->SetUser(user);
 
     shipNodes_[guid] = node;
 
     if (guid == myGuid_)
     {
-        URHO3D_LOGDEBUGF("Tracking node of guid: %d", guid);
+        node->GetChild("Ship")->GetComponent<ClientLocalShipState>()->SetUser(user);
         cameraNode_->GetComponent<OrbitingCameraController>()->SetTrackNode(node->GetChild("Ship"));
+    }
+    else
+    {
+        node->GetChild("Ship")->GetComponent<ClientRemoteShipState>()->SetUser(user);
     }
 }
 

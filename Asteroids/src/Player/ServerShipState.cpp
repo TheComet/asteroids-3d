@@ -77,6 +77,8 @@ void ServerShipState::HandleNetworkUpdate(StringHash eventType, VariantMap& even
     if (user_.Expired())
         return;
 
+    URHO3D_LOGDEBUGF("guid: %d, node id: %d", user_->GetGUID(), node_->GetID());
+
     msg_.Clear();
     msg_.WriteUShort(user_->GetGUID());
     msg_.WriteUByte(lastTimeStep_);

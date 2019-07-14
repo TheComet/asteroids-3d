@@ -32,10 +32,6 @@
 			<attribute name="Physics Position" value="0.011935 0.0301361 0.0986296" />
 			<attribute name="Collision Layer" value="4" />
 		</component>
-		<component type="ActionState" id="16777231" />
-		<component type="ShipController" id="16777232">
-			<attribute name="Ship Config" value="XMLFile;Config/Ship.xml" />
-		</component>
-		<component type="ClientShipState" id="16777234" />
+		<component type="ClientRemoteShipState" id="16777234" />
 	</node>
 </node>

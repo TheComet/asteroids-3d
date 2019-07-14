@@ -1,6 +1,6 @@
 #include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/Player/ActionState.hpp"
-#include "Asteroids/Player/ClientShipState.hpp"
+#include "Asteroids/Player/ClientRemoteShipState.hpp"
 #include "Asteroids/Player/ShipController.hpp"
 #include "Asteroids/Network/Protocol.hpp"
 
@@ -16,29 +16,28 @@ using namespace Urho3D;
 namespace Asteroids {
 
 // ----------------------------------------------------------------------------
-ClientShipState::ClientShipState(Context* context) :
+ClientRemoteShipState::ClientRemoteShipState(Context* context) :
     Component(context),
     timeStep_(0),
     lastTimeStep_(0)
 {
-    SubscribeToEvent(E_NETWORKMESSAGE, URHO3D_HANDLER(ClientShipState, HandleNetworkMessage));
-    SubscribeToEvent(E_NETWORKUPDATE, URHO3D_HANDLER(ClientShipState, HandleNetworkUpdate));
+    SubscribeToEvent(E_NETWORKMESSAGE, URHO3D_HANDLER(ClientRemoteShipState, HandleNetworkMessage));
 }
 
 // ----------------------------------------------------------------------------
-void ClientShipState::RegisterObject(Urho3D::Context* context)
+void ClientRemoteShipState::RegisterObject(Urho3D::Context* context)
 {
-    context->RegisterFactory<ClientShipState>(ASTEROIDS_CATEGORY);
+    context->RegisterFactory<ClientRemoteShipState>(ASTEROIDS_CATEGORY);
 }
 
 // ----------------------------------------------------------------------------
-void ClientShipState::SetUser(User* user)
+void ClientRemoteShipState::SetUser(User* user)
 {
     user_ = user;
 }
 
 // ----------------------------------------------------------------------------
-void ClientShipState::HandleNetworkMessage(StringHash eventType, VariantMap& eventData)
+void ClientRemoteShipState::HandleNetworkMessage(StringHash eventType, VariantMap& eventData)
 {
     using namespace NetworkMessage;
 
@@ -67,27 +66,6 @@ void ClientShipState::HandleNetworkMessage(StringHash eventType, VariantMap& eve
     Node* pivot = node_->GetParent();
     pivot->SetRotation(pivotRotation);
     node_->GetComponent<ShipController>()->SetAngle(shipAngle);
-}
-
-// ----------------------------------------------------------------------------
-void ClientShipState::HandleNetworkUpdate(StringHash eventType, VariantMap& eventData)
-{
-    ActionState* state = GetComponent<ActionState>();
-    Network* network = GetSubsystem<Network>();
-    Connection* connection = network->GetServerConnection();
-
-    assert(state);
-
-    if (connection == nullptr)  // no server to send to
-        return;
-    if (user_.Expired())
-        return;
-
-    msg_.Clear();
-    msg_.WriteUShort(user_->GetGUID());
-    msg_.WriteUByte(timeStep_++);
-    msg_.WriteUShort(state->GetState());
-    connection->SendMessage(MSG_CLIENT_SHIP_STATE, false, false, msg_);
 }
 
 }
