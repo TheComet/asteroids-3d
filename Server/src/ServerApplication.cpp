@@ -172,7 +172,6 @@ void ServerApplication::HandleFileChanged(StringHash eventType, VariantMap& even
 
     if (eventData[P_RESOURCENAME].GetString() == planetXML_->GetName())
     {
-        URHO3D_LOGDEBUGF("Reloading planet XML file %s", planetXML_->GetName().CString());
         planet_->LoadXML(planetXML_->GetRoot());
     }
 }

@@ -10,6 +10,7 @@
 #include <Urho3D/Network/NetworkEvents.h>
 #include <Urho3D/Scene/Node.h>
 #include <Urho3D/IO/Log.h>
+#include <Urho3D/Resource/XMLFile.h>
 
 using namespace Urho3D;
 

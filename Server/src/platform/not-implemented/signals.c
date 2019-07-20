@@ -1,4 +1,4 @@
-#include "LightshipServer/signals.h"
+#include "Server/signals.h"
 
 // ----------------------------------------------------------------------------
 void signals_register(void)

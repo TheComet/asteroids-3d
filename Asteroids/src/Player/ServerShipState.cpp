@@ -11,6 +11,7 @@
 #include <Urho3D/Network/Network.h>
 #include <Urho3D/Scene/Node.h>
 #include <Urho3D/IO/Log.h>
+#include <Urho3D/Resource/XMLFile.h>
 
 #include "Asteroids/Player/ShipController.hpp"
 
