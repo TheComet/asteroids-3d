@@ -9,6 +9,7 @@ set (INCLUDE_DIRS
 define_source_files (
     EXTRA_CPP_FILES
         "src/ClientApplication.cpp"
+        "src/Process.cpp"
         "src/main.cpp"
     GLOB_H_PATTERNS
         "include/Client/*.hpp")

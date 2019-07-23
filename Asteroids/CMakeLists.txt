@@ -15,6 +15,7 @@ define_source_files (
     EXTRA_CPP_FILES
         "src/AsteroidsLib.cpp"
         "src/Menu/ConnectPrompt.cpp"
+        "src/Menu/HostServerPrompt.cpp"
         "src/Menu/Menu.cpp"
         "src/Menu/MainMenu.cpp"
         "src/Menu/MenuScreen.cpp"

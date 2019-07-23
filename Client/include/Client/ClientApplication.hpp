@@ -12,6 +12,8 @@ namespace Urho3D {
 
 namespace Asteroids {
 
+class Process;
+
 class ClientApplication : public Urho3D::Application
 {
 public:
@@ -28,6 +30,8 @@ private:
 
     void HandleConnectPromptRequestConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleConnectPromptRequestCancel(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleHostServerPromptRequestConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleHostServerPromptRequestCancel(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleKeyDown(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleMainMenuQuit(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandlePlayerCreate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
@@ -39,6 +43,7 @@ private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;
     Urho3D::SharedPtr<Urho3D::DebugHud> debugHud_;
     Urho3D::SharedPtr<Urho3D::Node> cameraNode_;
+    Urho3D::SharedPtr<Process> serverProcess_;
     Urho3D::HashMap<User::GUID, Urho3D::Node*> shipNodes_;
     bool drawPhyGeometry_;
     User::GUID myGuid_;

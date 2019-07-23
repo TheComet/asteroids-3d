@@ -1,5 +1,6 @@
 #include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/Menu/ConnectPrompt.hpp"
+#include "Asteroids/Menu/HostServerPrompt.hpp"
 #include "Asteroids/Menu/MainMenu.hpp"
 #include "Asteroids/Player/ActionState.hpp"
 #include "Asteroids/Player/ClientLocalShipState.hpp"
@@ -31,6 +32,7 @@ void RegisterObjectFactories(Context* context)
     ActionState::RegisterObject(context);
     ConnectPrompt::RegisterObject(context);
     DeviceInputMapper::RegisterObject(context);
+    HostServerPrompt::RegisterObject(context);
     MainMenu::RegisterObject(context);
     OrbitingCameraController::RegisterObject(context);
     ShipController::RegisterObject(context);

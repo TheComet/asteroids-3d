@@ -7,7 +7,7 @@ static volatile int g_exit_requested = 0;
 // ----------------------------------------------------------------------------
 static void sig_handler(int signum)
 {
-    if (signum == SIGINT)
+    if (signum == SIGINT || signum == SIGTERM)
     {
         g_exit_requested = 1;
     }

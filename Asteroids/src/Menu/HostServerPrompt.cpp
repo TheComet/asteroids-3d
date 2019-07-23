@@ -1,43 +1,39 @@
 #include "Asteroids/Globals.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
-#include "Asteroids/Menu/ConnectPrompt.hpp"
+#include "Asteroids/Menu/HostServerPrompt.hpp"
 #include "Asteroids/Menu/MenuEvents.hpp"
-#include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
-#include "Asteroids/UserRegistry/ClientUserRegistry.hpp"
 #include "Asteroids/Util/UIUtils.hpp"
+#include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Input/InputEvents.h>
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/IO/FileSystem.h>
-#include <Urho3D/Network/Network.h>
-#include <Urho3D/Network/NetworkEvents.h>
-#include <Urho3D/Resource/ResourceCache.h>
-#include <Urho3D/Resource/ResourceEvents.h>
 #include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/Resource/XMLElement.h>
+#include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/UI/Button.h>
 #include <Urho3D/UI/LineEdit.h>
-#include <Urho3D/UI/UIEvents.h>
 #include <Urho3D/UI/Text.h>
+#include <Urho3D/UI/UIEvents.h>
 
 using namespace Urho3D;
 
 namespace Asteroids {
 
 // ----------------------------------------------------------------------------
-ConnectPrompt::ConnectPrompt(Context* context) :
+HostServerPrompt::HostServerPrompt(Context* context) :
     MenuScreen(context),
     info_(nullptr),
     username_(nullptr),
-    ipAddress_(nullptr),
     port_(nullptr),
     cancel_(nullptr),
-    connect_(nullptr),
+    host_(nullptr),
     connectionInProgress_(false)
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
-    xmlFile_ = cache->GetResource<XMLFile>("UI/ConnectPrompt.xml");
-    if (xmlFile_ == nullptr)
+    configFile_ = cache->GetResource<XMLFile>("UI/HostServerPrompt.xml");
+    if (configFile_ == nullptr)
         return;
 
     SetAlignment(HA_CENTER, VA_CENTER);
@@ -45,101 +41,94 @@ ConnectPrompt::ConnectPrompt(Context* context) :
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::RegisterObject(Context* context)
+void HostServerPrompt::RegisterObject(Context* context)
 {
-    context->RegisterFactory<ConnectPrompt>(ASTEROIDS_CATEGORY);
+    context->RegisterFactory<HostServerPrompt>(ASTEROIDS_CATEGORY);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::Show()
+void HostServerPrompt::Show()
 {
     SetVisible(true);
     info_->SetColor(Color::WHITE);
-    info_->SetText("Connect to a server:");
-    SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(ConnectPrompt, HandleKeyDown));
+    info_->SetText("Host a Server:");
+    SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(HostServerPrompt, HandleKeyDown));
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::Hide()
+void HostServerPrompt::Hide()
 {
     SetVisible(false);
     UnsubscribeFromEvent(E_KEYDOWN);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::LoadXMLAndInit()
+void HostServerPrompt::LoadXMLAndInit()
 {
     ResourceCache* cache = GetSubsystem<ResourceCache>();
 
     RemoveAllChildren();
-    UIElement* ui = LoadChildXML(xmlFile_->GetRoot(), cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
+    UIElement* ui = LoadChildXML(configFile_->GetRoot(), cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
 
     info_ = GetUIChild<Text>(ui, "Text_Info");
     username_ = GetUIChild<LineEdit>(ui, "LineEdit_Username");
-    ipAddress_ = GetUIChild<LineEdit>(ui, "LineEdit_IPAddress");
     port_ = GetUIChild<LineEdit>(ui, "LineEdit_Port");
     cancel_ = GetUIChild<Button>(ui, "Button_Cancel");
-    connect_ = GetUIChild<Button>(ui, "Button_Connect");
+    host_ = GetUIChild<Button>(ui, "Button_Host");
 
     if (info_ == nullptr)
         URHO3D_LOGERROR("Failed to get UI element Text_Info");
 
     if (username_)
-        SubscribeToEvent(username_, E_TEXTCHANGED, URHO3D_HANDLER(ConnectPrompt, HandleTextChanged));
+        SubscribeToEvent(username_, E_TEXTCHANGED, URHO3D_HANDLER(HostServerPrompt, HandleTextChanged));
     else
         URHO3D_LOGERROR("Failed to get UI element LineEdit_Username");
 
-    if (ipAddress_)
-        SubscribeToEvent(ipAddress_, E_TEXTCHANGED, URHO3D_HANDLER(ConnectPrompt, HandleTextChanged));
-    else
-        URHO3D_LOGERROR("Failed to get UI element LineEdit_IPAddress");
-
     if (port_)
-        SubscribeToEvent(port_, E_TEXTCHANGED, URHO3D_HANDLER(ConnectPrompt, HandleTextChanged));
+        SubscribeToEvent(port_, E_TEXTCHANGED, URHO3D_HANDLER(HostServerPrompt, HandleTextChanged));
     else
         URHO3D_LOGERROR("Failed to get UI element LineEdit_Port");
 
     if (cancel_)
-        SubscribeToEvent(cancel_, E_RELEASED, URHO3D_HANDLER(ConnectPrompt, HandleButtonCancel));
+        SubscribeToEvent(cancel_, E_RELEASED, URHO3D_HANDLER(HostServerPrompt, HandleButtonCancel));
     else
         URHO3D_LOGERROR("Failed to get UI element Button_Cancel");
 
-    if (connect_)
-        SubscribeToEvent(connect_, E_RELEASED, URHO3D_HANDLER(ConnectPrompt, HandleButtonConnect));
+    if (host_)
+        SubscribeToEvent(host_, E_RELEASED, URHO3D_HANDLER(HostServerPrompt, HandleButtonHost));
     else
-        URHO3D_LOGERROR("Failed to get UI element Button_Connect");
+        URHO3D_LOGERROR("Failed to get UI element Button_Host");
 
     LoadSettings();
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::SaveSettings()
+void HostServerPrompt::SaveSettings()
 {
     // Save the previously typed in values to XML so we don't have to type in
     // username/ip every time
     FileSystem* fs = GetSubsystem<FileSystem>();
     String url = fs->GetAppPreferencesDir("TheComet", "Asteroids");
-    url.Append("ConnectPromptSettings.xml");
+    url.Append("HostServerPromptSettings.xml");
 
     XMLFile xml(context_);
     XMLElement settings = xml.CreateRoot("settings");
     settings.CreateChild("username").SetValue(username_->GetText());
-    settings.CreateChild("address").SetValue(ipAddress_->GetText());
     settings.CreateChild("port").SetValue(port_->GetText());
 
     File f(context_);
     if (f.Open(url, FILE_WRITE) == false)
         return;
-    URHO3D_LOGDEBUGF("Saving connect prompt settings to %s", url.CString());
+    URHO3D_LOGDEBUGF("Saving host server prompt settings to %s", url.CString());
     xml.Save(f);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::LoadSettings()
+void HostServerPrompt::LoadSettings()
 {
     FileSystem* fs = GetSubsystem<FileSystem>();
     String url = fs->GetAppPreferencesDir("TheComet", "Asteroids");
-    url.Append("ConnectPromptSettings.xml");
+    url.Append("HostServerPromptSettings.xml");
 
     File f(context_);
     if (f.Open(url, FILE_READ) == false)
@@ -149,12 +138,12 @@ void ConnectPrompt::LoadSettings()
 
     XMLElement settings = xml.GetRoot();
     username_->SetText(settings.GetChild("username").GetValue());
-    ipAddress_->SetText(settings.GetChild("address").GetValue());
-    port_->SetText(settings.GetChild("port").GetValue());
+    String port = settings.GetChild("port").GetValue();
+    port_->SetText(port.Length() > 0 ? port : String(DEFAULT_PORT));
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::InitiateConnectionProcess()
+void HostServerPrompt::InitiateConnectionProcess()
 {
     // Urho3D doesn't like multiple pending Network::Connect() calls. Disable
     // the connect button to prevent this
@@ -169,29 +158,28 @@ void ConnectPrompt::InitiateConnectionProcess()
     SubscribeToRegistryEvents();
     connectionInProgress_ = true;
 
-    info_->SetText("Connecting to server...");
+    info_->SetText("Starting Server...");
     info_->SetColor(Color::WHITE);
 
     // The Network::Connect() call needs to be given a pointer to the scene,
     // but we aren't responsible for managing the scene. Therefore, send an
     // event requesting to be connected so another system can do it for us.
-    using namespace ConnectPromptRequestConnect;
+    using namespace HostServerPromptRequestConnect;
     VariantMap& eventData = GetEventDataMap();
     eventData[P_USERNAME] = username_->GetText();
-    eventData[P_ADDRESS] = ipAddress_->GetText();
     eventData[P_PORT] = ToUInt(port_->GetText());
-    SendEvent(E_CONNECTPROMPTREQUESTCONNECT, eventData);
+    SendEvent(E_HOSTSERVERPROMPTREQUESTCONNECT, eventData);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::CancelConnectionProcess()
+void HostServerPrompt::CancelConnectionProcess()
 {
     // If a connection is not in progress, then the cancel button acts as a
     // "go back to previous screen" button. Otherwise it aborts the connection
     // in progress
     if (connectionInProgress_ == false)
     {
-        SendEvent(E_CONNECTPROMPTGOBACK);
+        SendEvent(E_HOSTSERVERPROMPTGOBACK);
         return;
     }
 
@@ -201,41 +189,39 @@ void ConnectPrompt::CancelConnectionProcess()
     UnlockInput();
     UnsubscribeFromRegistryEvents();
     connectionInProgress_ = false;
-    SendEvent(E_CONNECTPROMPTREQUESTCANCEL);
+    SendEvent(E_HOSTSERVERPROMPTREQUESTCANCEL);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::LockInput()
+void HostServerPrompt::LockInput()
 {
-    connect_->SetEnabled(false);
+    host_->SetEnabled(false);
     username_->SetEnabled(false);
-    ipAddress_->SetEnabled(false);
     port_->SetEnabled(false);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::UnlockInput()
+void HostServerPrompt::UnlockInput()
 {
-    connect_->SetEnabled(true);
+    host_->SetEnabled(true);
     username_->SetEnabled(true);
-    ipAddress_->SetEnabled(true);
     port_->SetEnabled(true);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::HandleButtonCancel(StringHash eventType, VariantMap& eventData)
+void HostServerPrompt::HandleButtonCancel(StringHash eventType, VariantMap& eventData)
 {
     CancelConnectionProcess();
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::HandleButtonConnect(StringHash eventType, VariantMap& eventData)
+void HostServerPrompt::HandleButtonHost(StringHash eventType, VariantMap& eventData)
 {
     InitiateConnectionProcess();
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::HandleKeyDown(StringHash eventType, VariantMap& eventData)
+void HostServerPrompt::HandleKeyDown(StringHash eventType, VariantMap& eventData)
 {
     using namespace KeyDown;
 
@@ -248,32 +234,31 @@ void ConnectPrompt::HandleKeyDown(StringHash eventType, VariantMap& eventData)
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::HandleTextChanged(StringHash eventType, VariantMap& eventData)
+void HostServerPrompt::HandleTextChanged(StringHash eventType, VariantMap& eventData)
 {
-    // Only enable the connect button if the username and ip address text fields
-    // contain text
-    if (username_->GetText().Length() == 0 || ipAddress_->GetText().Length() == 0)
-        connect_->SetEnabled(false);
+    // Only enable the connect button if the username text field contains text
+    if (username_->GetText().Length() == 0)
+        host_->SetEnabled(false);
     else
-        connect_->SetEnabled(true);
+        host_->SetEnabled(true);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::SubscribeToRegistryEvents()
+void HostServerPrompt::SubscribeToRegistryEvents()
 {
-    SubscribeToEvent(E_REGISTERFAILED, URHO3D_HANDLER(ConnectPrompt, HandleRegisterFailed));
-    SubscribeToEvent(E_REGISTERSUCCEEDED, URHO3D_HANDLER(ConnectPrompt, HandleRegisterSucceeded));
+    SubscribeToEvent(E_REGISTERFAILED, URHO3D_HANDLER(HostServerPrompt, HandleRegisterFailed));
+    SubscribeToEvent(E_REGISTERSUCCEEDED, URHO3D_HANDLER(HostServerPrompt, HandleRegisterSucceeded));
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::UnsubscribeFromRegistryEvents()
+void HostServerPrompt::UnsubscribeFromRegistryEvents()
 {
     UnsubscribeFromEvent(E_REGISTERFAILED);
     UnsubscribeFromEvent(E_REGISTERSUCCEEDED);
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::HandleRegisterFailed(StringHash eventType, VariantMap& eventData)
+void HostServerPrompt::HandleRegisterFailed(StringHash eventType, VariantMap& eventData)
 {
     info_->SetText("Error: " + eventData[RegisterFailed::P_REASON].GetString());
     info_->SetColor(Color::RED);
@@ -282,10 +267,10 @@ void ConnectPrompt::HandleRegisterFailed(StringHash eventType, VariantMap& event
 }
 
 // ----------------------------------------------------------------------------
-void ConnectPrompt::HandleRegisterSucceeded(StringHash eventType, VariantMap& eventData)
+void HostServerPrompt::HandleRegisterSucceeded(StringHash eventType, VariantMap& eventData)
 {
     UnsubscribeFromRegistryEvents();
-    SendEvent(E_CONNECTPROMPTSUCCESS);
+    SendEvent(E_HOSTSERVERPROMPTSUCCESS);
 }
 
 }

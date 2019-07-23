@@ -69,4 +69,40 @@ URHO3D_EVENT(E_CONNECTPROMPTGOBACK, ConnectPromptGoBack)
 {
 }
 
+/*!
+ * @brief Sent when the host server prompt button "Host" is pressed. As of now,
+ * the ClientApplication initiates the connection in response to this event
+ * because the scene must be passed in to Network::Connect().
+ */
+URHO3D_EVENT(E_HOSTSERVERPROMPTREQUESTCONNECT, HostServerPromptRequestConnect)
+{
+    URHO3D_PARAM(P_USERNAME, Username);  // String
+    URHO3D_PARAM(P_PORT, Port);          // int
+}
+
+/*!
+ * @brief Sent when the host server prompt cancel button is pressed while a
+ * connection is in progress.
+ */
+URHO3D_EVENT(E_HOSTSERVERPROMPTREQUESTCANCEL, HostServerPromptRequestCancel)
+{
+}
+
+/*!
+ * @brief Sent when the connection to the server succeeds and the prompt should
+ * be hidden.
+ */
+URHO3D_EVENT(E_HOSTSERVERPROMPTSUCCESS, HostServerPromptSuccess)
+{
+}
+
+/*!
+ * @brief Sent when the host server prompt button "Cancel" is pressed when there
+ * is no connection in progress. This should switch the menu back to the main
+ * menu screen.
+ */
+URHO3D_EVENT(E_HOSTSERVERPROMPTGOBACK, HostServerPromptGoBack)
+{
+}
+
 }

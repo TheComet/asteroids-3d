@@ -11,12 +11,12 @@ namespace Urho3D {
 
 namespace Asteroids {
 
-class ConnectPrompt : public MenuScreen
+class HostServerPrompt : public MenuScreen
 {
-    URHO3D_OBJECT(ConnectPrompt, MenuScreen)
+    URHO3D_OBJECT(HostServerPrompt, MenuScreen)
 
 public:
-    ConnectPrompt(Urho3D::Context* context);
+    HostServerPrompt(Urho3D::Context* context);
     static void RegisterObject(Urho3D::Context* context);
 
     void Show() override;
@@ -34,7 +34,7 @@ private:
     // UI element events
     void HandleKeyDown(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleButtonCancel(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleButtonConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleButtonHost(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleTextChanged(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
     // UserRegistry and network events when attempting to connect
@@ -44,14 +44,13 @@ private:
     void HandleRegisterSucceeded(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
-    Urho3D::SharedPtr<Urho3D::XMLFile> xmlFile_;
+    Urho3D::SharedPtr<Urho3D::XMLFile> configFile_;
 
     Urho3D::Text* info_;
     Urho3D::LineEdit* username_;
-    Urho3D::LineEdit* ipAddress_;
     Urho3D::LineEdit* port_;
     Urho3D::Button* cancel_;
-    Urho3D::Button* connect_;
+    Urho3D::Button* host_;
 
     bool connectionInProgress_;
 };

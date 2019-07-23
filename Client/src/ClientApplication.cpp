@@ -1,4 +1,5 @@
 #include "Client/ClientApplication.hpp"
+#include "Client/Process.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/Menu/Menu.hpp"
 #include "Asteroids/Menu/MenuEvents.hpp"
@@ -42,6 +43,7 @@ namespace Asteroids {
 // ----------------------------------------------------------------------------
 ClientApplication::ClientApplication(Context* context) :
     Application(context),
+    serverProcess_(new Process),
     drawPhyGeometry_(false)
 {
 }
@@ -174,6 +176,8 @@ void ClientApplication::SubscribeToEvents()
     SubscribeToEvent(E_MAINMENUQUIT, URHO3D_HANDLER(ClientApplication, HandleMainMenuQuit));
     SubscribeToEvent(E_CONNECTPROMPTREQUESTCONNECT, URHO3D_HANDLER(ClientApplication, HandleConnectPromptRequestConnect));
     SubscribeToEvent(E_CONNECTPROMPTREQUESTCANCEL, URHO3D_HANDLER(ClientApplication, HandleConnectPromptRequestCancel));
+    SubscribeToEvent(E_HOSTSERVERPROMPTREQUESTCONNECT, URHO3D_HANDLER(ClientApplication, HandleHostServerPromptRequestConnect));
+    SubscribeToEvent(E_HOSTSERVERPROMPTREQUESTCANCEL, URHO3D_HANDLER(ClientApplication, HandleHostServerPromptRequestCancel));
     SubscribeToEvent(E_PLAYERCREATE, URHO3D_HANDLER(ClientApplication, HandlePlayerCreate));
     SubscribeToEvent(E_PLAYERDESTROY, URHO3D_HANDLER(ClientApplication, HandlePlayerDestroy));
     SubscribeToEvent(E_REGISTERSUCCEEDED, URHO3D_HANDLER(ClientApplication, HandleRegisterSucceeded));
@@ -239,6 +243,28 @@ void ClientApplication::HandleConnectPromptRequestConnect(StringHash eventType, 
 void ClientApplication::HandleConnectPromptRequestCancel(StringHash eventType, VariantMap& eventData)
 {
     GetSubsystem<Network>()->Disconnect();
+}
+
+// ----------------------------------------------------------------------------
+void ClientApplication::HandleHostServerPromptRequestConnect(StringHash eventType, VariantMap& eventData)
+{
+    using namespace HostServerPromptRequestConnect;
+
+    serverProcess_->Open("asteroids-server");
+
+    GetSubsystem<ClientUserRegistry>()->TryRegister(
+        eventData[P_USERNAME].GetString(),
+        "127.0.0.1",
+        eventData[P_PORT].GetInt(),
+        scene_
+    );
+}
+
+// ----------------------------------------------------------------------------
+void ClientApplication::HandleHostServerPromptRequestCancel(StringHash eventType, VariantMap& eventData)
+{
+    GetSubsystem<Network>()->Disconnect();
+    serverProcess_->Close();
 }
 
 // ----------------------------------------------------------------------------

@@ -78,12 +78,12 @@ void MainMenu::LoadXMLAndInit()
     if (options)
         SubscribeToEvent(options, E_RELEASED, URHO3D_HANDLER(MainMenu, HandleButtonOptions));
     else
-        URHO3D_LOGERROR("Failed to get button Button_Connect");
+        URHO3D_LOGERROR("Failed to get button Button_Options");
 
     if (quit)
         SubscribeToEvent(quit, E_RELEASED, URHO3D_HANDLER(MainMenu, HandleButtonQuit));
     else
-        URHO3D_LOGERROR("Failed to get button Button_Connect");
+        URHO3D_LOGERROR("Failed to get button Button_Quit");
 }
 
 // ----------------------------------------------------------------------------
@@ -96,7 +96,6 @@ void MainMenu::HandleButtonConnectToServer(StringHash eventType, VariantMap& eve
 void MainMenu::HandleButtonHost(StringHash eventType, VariantMap& eventData)
 {
     SendEvent(E_MAINMENUHOST);
-    URHO3D_LOGERROR("Not implemented!");
 }
 
 // ----------------------------------------------------------------------------
