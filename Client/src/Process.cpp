@@ -11,6 +11,7 @@
 #   include <errno.h>
 #   include <signal.h>
 #   include <fcntl.h>
+#   include <stdlib.h>
 #endif
 
 using namespace Urho3D;
@@ -75,7 +76,7 @@ Process::~Process()
 }
 
 // ----------------------------------------------------------------------------
-bool Process::Open(const char* command, IO options)
+bool Process::Open(StringVector args, IO options)
 {
     pid_t child_pid;
 
@@ -128,10 +129,19 @@ bool Process::Open(const char* command, IO options)
 
         close(child_status_fd[READ]);
 
+        // execv needs a specific structure to work
+        char** argv = (char**)malloc(args.Size() * (sizeof(char*) + 1));
+        for (int i = 0; i != args.Size(); ++i)
+        {
+            argv[i] = (char*)malloc(sizeof(char) * (strlen(args[i].CString()) + 1));
+            strcpy(argv[i], args[i].CString());
+        }
+        argv[args.Size()] = NULL;
+
         // Needed so negative PIDs can kill children of /bin/sh
         setpgid(child_pid, child_pid);
         prctl(PR_SET_PDEATHSIG, SIGTERM);
-        execl(command, command, (char*)NULL);
+        execv(argv[0], argv);
 
         // If all goes well this code is never reached
         char errorCode = '\1';
@@ -167,7 +177,7 @@ bool Process::Open(const char* command, IO options)
 
         if (bytesRead == 1 && status == '\1')
         {
-            URHO3D_LOGERRORF("Failed to start subprocess /bin/sh -c %s", command);
+            URHO3D_LOGERRORF("Failed to start subprocess %s", args[0].CString());
             goto spawn_subprocess_failed;
         }
 

@@ -275,10 +275,9 @@ void ConnectPrompt::UnsubscribeFromRegistryEvents()
 // ----------------------------------------------------------------------------
 void ConnectPrompt::HandleRegisterFailed(StringHash eventType, VariantMap& eventData)
 {
+    CancelConnectionProcess();
     info_->SetText("Error: " + eventData[RegisterFailed::P_REASON].GetString());
     info_->SetColor(Color::RED);
-    UnsubscribeFromRegistryEvents();
-    UnlockInput();
 }
 
 // ----------------------------------------------------------------------------

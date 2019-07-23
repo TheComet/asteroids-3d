@@ -26,13 +26,16 @@ namespace Asteroids {
 
 // ----------------------------------------------------------------------------
 ServerApplication::ServerApplication(Context* context) :
-    Application(context)
+    Application(context),
+    args_({DEFAULT_PORT})
 {
 }
 
 // ----------------------------------------------------------------------------
 void ServerApplication::Setup()
 {
+    ParseArgs();
+
     engineParameters_[EP_LOG_NAME] = "asteroids-server.log";
     engineParameters_[EP_HEADLESS] = true;
 }
@@ -65,7 +68,7 @@ void ServerApplication::Start()
     network->SetSimulatedLatency(200);
     network->SetSimulatedPacketLoss(0.1);
 #endif
-    network->StartServer(DEFAULT_PORT);
+    network->StartServer(args_.port_);
 }
 
 // ----------------------------------------------------------------------------
@@ -73,6 +76,40 @@ void ServerApplication::Stop()
 {
     Network* network = GetSubsystem<Network>();
     network->StopServer();
+}
+
+// ----------------------------------------------------------------------------
+void ServerApplication::ParseArgs()
+{
+    enum Expect
+    {
+        EXPECT_NONE,
+        EXPECT_PORT_NUMBER
+    } expected = EXPECT_NONE;
+
+    for (const auto& arg : GetArguments())
+    {
+        switch (expected)
+        {
+            case EXPECT_PORT_NUMBER : {
+                args_.port_ = ToInt(arg);
+                expected = EXPECT_NONE;
+            } break;
+
+            case EXPECT_NONE : {
+                if (arg == "--port") expected = EXPECT_PORT_NUMBER;
+                else
+                {
+                    ErrorExit("Unknown option " + arg);
+                }
+            } break;
+        }
+    }
+
+    if (expected != EXPECT_NONE)
+    {
+        ErrorExit("Missing argument to command line option");
+    }
 }
 
 // ----------------------------------------------------------------------------

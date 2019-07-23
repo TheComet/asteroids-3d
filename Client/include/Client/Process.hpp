@@ -55,7 +55,7 @@ public:
 
     ~Process();
 
-    bool Open(const char* command, IO options=NONE);
+    bool Open(Urho3D::StringVector argv, IO options=NONE);
     void Close();
     void RequestClose();
     void Wait();

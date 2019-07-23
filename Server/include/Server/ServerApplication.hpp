@@ -22,6 +22,7 @@ public:
     virtual void Stop() override;
 
 private:
+    void ParseArgs();
     void SubscribeToEvents();
     void LoadScene();
     void HandleUserJoined(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
@@ -31,6 +32,9 @@ private:
     void HandleFileChanged(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
+    struct {
+        int port_;
+    } args_;
     Urho3D::SharedPtr<Urho3D::Scene> scene_;
     Urho3D::SharedPtr<Urho3D::XMLFile> planetXML_;
     Urho3D::Node* planet_;

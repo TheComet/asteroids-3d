@@ -250,7 +250,12 @@ void ClientApplication::HandleHostServerPromptRequestConnect(StringHash eventTyp
 {
     using namespace HostServerPromptRequestConnect;
 
-    serverProcess_->Open("asteroids-server");
+    StringVector args;
+    args.Push("asteroids-server");
+    args.Push("--port");
+    args.Push(String(eventData[P_PORT].GetInt()));
+    if (serverProcess_->Open(args) == false)
+        return;
 
     GetSubsystem<ClientUserRegistry>()->TryRegister(
         eventData[P_USERNAME].GetString(),
@@ -272,14 +277,16 @@ void ClientApplication::HandlePlayerCreate(StringHash eventType, VariantMap& eve
 {
     using namespace PlayerCreate;
 
+    // Get associated User for this player
     User::GUID guid = eventData[P_GUID].GetUInt();
     assert(shipNodes_.Find(guid) == shipNodes_.End());
     User* user = GetSubsystem<UserRegistry>()->GetUser(guid);
 
+    // Load either the "remote" ship, if this user is someone on another
+    // machine, or the "local" ship if this user is us
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     XMLFile* shipfab = cache->GetResource<XMLFile>(
         guid == myGuid_ ? "Prefabs/ClientLocalShip.xml" : "Prefabs/ClientRemoteShip.xml");
-
     Node* node = scene_->CreateChild("", LOCAL);
     node->LoadXML(shipfab->GetRoot());
     node->SetRotation(eventData[P_PIVOTROTATION].GetQuaternion());
