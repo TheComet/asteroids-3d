@@ -19,6 +19,7 @@
 #include <Urho3D/Resource/ResourceEvents.h>
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Core/StringUtils.h>
 
 using namespace Urho3D;
 

@@ -27,7 +27,7 @@ void Menu::StartMainMenu()
         return;
 
     screens_[MAIN_MENU] = ui->GetRoot()->CreateChild<MainMenu>();
-    screens_[CONNECT_PROMPT] = ui->GetRoot()->CreateChild<ConnectPrompt>();
+    screens_[CONNECT_PROMPT1] = ui->GetRoot()->CreateChild<ConnectPrompt>();
     screens_[HOST_SERVER_PROMPT] = ui->GetRoot()->CreateChild<HostServerPrompt>();
 
     SwitchToScreen(MAIN_MENU);
@@ -36,8 +36,8 @@ void Menu::StartMainMenu()
     SubscribeToEvent(screens_[MAIN_MENU], E_MAINMENUHOST, URHO3D_HANDLER(Menu, HandleMainMenuHost));
     SubscribeToEvent(screens_[MAIN_MENU], E_MAINMENUQUIT, URHO3D_HANDLER(Menu, HandleMainMenuQuit));
 
-    SubscribeToEvent(screens_[CONNECT_PROMPT], E_CONNECTPROMPTGOBACK, URHO3D_HANDLER(Menu, HandleConnectPromptCancel));
-    SubscribeToEvent(screens_[CONNECT_PROMPT], E_CONNECTPROMPTSUCCESS, URHO3D_HANDLER(Menu, HandleConnectPromptSuccess));
+    SubscribeToEvent(screens_[CONNECT_PROMPT1], E_CONNECTPROMPTGOBACK, URHO3D_HANDLER(Menu, HandleConnectPromptCancel));
+    SubscribeToEvent(screens_[CONNECT_PROMPT1], E_CONNECTPROMPTSUCCESS, URHO3D_HANDLER(Menu, HandleConnectPromptSuccess));
 
     SubscribeToEvent(screens_[HOST_SERVER_PROMPT], E_HOSTSERVERPROMPTGOBACK, URHO3D_HANDLER(Menu, HandleHostServerPromptCancel));
     SubscribeToEvent(screens_[HOST_SERVER_PROMPT], E_HOSTSERVERPROMPTSUCCESS, URHO3D_HANDLER(Menu, HandleHostServerPromptSuccess));
@@ -65,7 +65,7 @@ void Menu::HideAllScreens()
 // ----------------------------------------------------------------------------
 void Menu::HandleMainMenuConnect(StringHash eventType, VariantMap& eventData)
 {
-    SwitchToScreen(CONNECT_PROMPT);
+    SwitchToScreen(CONNECT_PROMPT1);
 }
 
 // ----------------------------------------------------------------------------

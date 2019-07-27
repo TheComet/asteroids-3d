@@ -78,6 +78,7 @@ URHO3D_EVENT(E_HOSTSERVERPROMPTREQUESTCONNECT, HostServerPromptRequestConnect)
 {
     URHO3D_PARAM(P_USERNAME, Username);  // String
     URHO3D_PARAM(P_PORT, Port);          // int
+    URHO3D_PARAM(P_SUCCESS, Success);    // Event handlers can set this bool to false if something goes wrong
 }
 
 /*!

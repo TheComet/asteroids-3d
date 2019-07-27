@@ -168,7 +168,17 @@ void HostServerPrompt::InitiateConnectionProcess()
     VariantMap& eventData = GetEventDataMap();
     eventData[P_USERNAME] = username_->GetText();
     eventData[P_PORT] = ToUInt(port_->GetText());
+    eventData[P_SUCCESS] = true;
     SendEvent(E_HOSTSERVERPROMPTREQUESTCONNECT, eventData);
+
+    if (eventData[P_SUCCESS].GetBool() == false)
+    {
+        UnlockInput();
+        UnsubscribeFromRegistryEvents();
+        connectionInProgress_ = false;
+        info_->SetColor(Color::RED);
+        info_->SetText("Failed to start Server");
+    }
 }
 
 // ----------------------------------------------------------------------------

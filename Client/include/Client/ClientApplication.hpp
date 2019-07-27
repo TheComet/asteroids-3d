@@ -43,7 +43,6 @@ private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;
     Urho3D::SharedPtr<Urho3D::DebugHud> debugHud_;
     Urho3D::SharedPtr<Urho3D::Node> cameraNode_;
-    Urho3D::SharedPtr<Process> serverProcess_;
     Urho3D::HashMap<User::GUID, Urho3D::Node*> shipNodes_;
     bool drawPhyGeometry_;
     User::GUID myGuid_;

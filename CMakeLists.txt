@@ -5,6 +5,9 @@ list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake/Modules")
 if (NOT CMAKE_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE Debug CACHE STRING "")
 endif ()
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    add_definitions (-DDEBUG)
+endif ()
 
 project ("Asteroids 3D")
 

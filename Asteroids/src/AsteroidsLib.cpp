@@ -26,19 +26,20 @@ const char* ASTEROIDS_CATEGORY = "Asteroids";
 // ----------------------------------------------------------------------------
 void RegisterObjectFactories(Context* context)
 {
+    // TODO convert these to static methods
     context->RegisterFactory<Asteroid>(ASTEROIDS_CATEGORY);
     context->RegisterFactory<Bullet>(ASTEROIDS_CATEGORY);
 
     ActionState::RegisterObject(context);
+    ClientLocalShipState::RegisterObject(context);
+    ClientRemoteShipState::RegisterObject(context);
     ConnectPrompt::RegisterObject(context);
     DeviceInputMapper::RegisterObject(context);
     HostServerPrompt::RegisterObject(context);
     MainMenu::RegisterObject(context);
     OrbitingCameraController::RegisterObject(context);
-    ShipController::RegisterObject(context);
-    ClientLocalShipState::RegisterObject(context);
-    ClientRemoteShipState::RegisterObject(context);
     ServerShipState::RegisterObject(context);
+    ShipController::RegisterObject(context);
 }
 
 // ----------------------------------------------------------------------------

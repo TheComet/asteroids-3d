@@ -34,6 +34,8 @@ define_source_files (
         "src/UserRegistry/UserRegistry.cpp"
         "src/UserRegistry/User.cpp"
         "src/Util/DebugTextScroll.cpp"
+	"src/Util/Process.cpp"
+	"src/Util/UnidirectionalPipe.cpp"
     GLOB_H_PATTERNS
         "include/Asteroids/*.hpp"
         "include/Asteroids/Network/*.hpp"

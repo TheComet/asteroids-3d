@@ -1,5 +1,5 @@
 #include "Client/ClientApplication.hpp"
-#include "Client/Process.hpp"
+#include "Client/LocalServer.hpp"
 #include "Asteroids/AsteroidsLib.hpp"
 #include "Asteroids/Menu/Menu.hpp"
 #include "Asteroids/Menu/MenuEvents.hpp"
@@ -43,7 +43,6 @@ namespace Asteroids {
 // ----------------------------------------------------------------------------
 ClientApplication::ClientApplication(Context* context) :
     Application(context),
-    serverProcess_(new Process),
     drawPhyGeometry_(false)
 {
 }
@@ -67,8 +66,9 @@ void ClientApplication::Start()
     RegisterRemoteNetworkEvents(context_);
 
     context_->RegisterSubsystem<ClientUserRegistry>();
-    context_->RegisterSubsystem<UserRegistry>();
     context_->RegisterSubsystem<Menu>();
+    context_->RegisterSubsystem<UserRegistry>();
+    context_->RegisterSubsystem<LocalServer>();
 
 #if defined(DEBUG)
     context_->RegisterSubsystem<DebugTextScroll>();
@@ -250,12 +250,11 @@ void ClientApplication::HandleHostServerPromptRequestConnect(StringHash eventTyp
 {
     using namespace HostServerPromptRequestConnect;
 
-    StringVector args;
-    args.Push("asteroids-server");
-    args.Push("--port");
-    args.Push(String(eventData[P_PORT].GetInt()));
-    if (serverProcess_->Open(args) == false)
+    if (GetSubsystem<LocalServer>()->Start(eventData[P_PORT].GetInt()) == false)
+    {
+        eventData[P_SUCCESS] = false;
         return;
+    }
 
     GetSubsystem<ClientUserRegistry>()->TryRegister(
         eventData[P_USERNAME].GetString(),
@@ -269,7 +268,7 @@ void ClientApplication::HandleHostServerPromptRequestConnect(StringHash eventTyp
 void ClientApplication::HandleHostServerPromptRequestCancel(StringHash eventType, VariantMap& eventData)
 {
     GetSubsystem<Network>()->Disconnect();
-    serverProcess_->Close();
+    GetSubsystem<LocalServer>()->Stop();
 }
 
 // ----------------------------------------------------------------------------

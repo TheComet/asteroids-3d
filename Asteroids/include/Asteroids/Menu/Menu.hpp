@@ -19,7 +19,7 @@ public:
     enum Screen
     {
         MAIN_MENU,
-        CONNECT_PROMPT,
+        CONNECT_PROMPT1,  // Windows defines CONNECT_PROMPT somewhere so we can't use that
         HOST_SERVER_PROMPT,
 
         SCREEN_COUNT
@@ -33,7 +33,6 @@ public:
     void HideAllScreens();
 
 private:
-
     void HandleMainMenuConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleMainMenuHost(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleMainMenuQuit(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
