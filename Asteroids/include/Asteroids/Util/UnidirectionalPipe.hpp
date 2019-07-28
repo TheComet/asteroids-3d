@@ -2,6 +2,7 @@
 
 #include "Asteroids/Config.hpp"
 #include <Urho3D/IO/AbstractFile.h>
+#include <stdio.h>
 
 namespace Asteroids {
 

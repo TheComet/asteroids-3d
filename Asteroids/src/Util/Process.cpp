@@ -27,6 +27,7 @@ enum
 };
 
 // ----------------------------------------------------------------------------
+#if defined(_WIN32)
 void LogLastError(const char* pre)
 {
     LPSTR lpMessageBuffer = nullptr;
@@ -39,6 +40,7 @@ void LogLastError(const char* pre)
     URHO3D_LOGERRORF("%s: %s", pre, lpMessageBuffer);
     LocalFree(lpMessageBuffer);
 }
+#endif
 
 // ----------------------------------------------------------------------------
 Process::Process()
@@ -132,7 +134,7 @@ bool Process::Open(StringVector args, IO options)
     }
 
     Close();
-    
+
     CloseHandle(piProcInfo.hProcess);
 
     // Close ends of the pipees we don't need
@@ -166,6 +168,8 @@ bool Process::Open(StringVector args, IO options)
     int stdout_fd[2] = {-1, -1};
     int stderr_fd[2] = {-1, -1};
     int child_status_fd[2] = {-1, -1};
+    int bytesRead;
+    char status;
 
     // Create 3 new pipes for stdin, stdout and stderr
     if ((options & STDIN) && pipe(stdin_fd) != 0)
@@ -184,7 +188,7 @@ bool Process::Open(StringVector args, IO options)
         URHO3D_LOGERRORF("Process::Open() - fork() failed: %s", strerror(errno));
         goto fork_failed;
     }
-    
+
     if (child_pid == 0)  // Child process
     {
         if (options & STDIN)
@@ -235,15 +239,14 @@ bool Process::Open(StringVector args, IO options)
     // will write 0x01 to the pipe before exiting, letting us know an error
     // occurred.
     close(child_status_fd[WRITE]);
-    char status;
-    int bytesRead = read(child_status_fd[READ], &status, 1);
+    bytesRead = read(child_status_fd[READ], &status, 1);
     close(child_status_fd[READ]);
 
     // Oh oh, child wrote an error byte to the pipe
     if (bytesRead == 1)
     {
         if (status != 1)
-            URHO3D_LOGWARNING("Received unexpected byte from child through status pipe.")
+            URHO3D_LOGWARNING("Received unexpected byte from child through status pipe.");
         URHO3D_LOGERRORF("Failed to start subprocess %s", args[0].CString());
         goto spawn_subprocess_failed;
     }
@@ -257,7 +260,7 @@ bool Process::Open(StringVector args, IO options)
     }
 
     Close();
-    
+
     if (options & STDIN) close(stdin_fd[READ]);
     if (options & STDOUT) close(stdout_fd[WRITE]);
     if (options & STDERR) close(stderr_fd[WRITE]);
@@ -328,7 +331,7 @@ void Process::Terminate()
 
     if (!TerminateProcess(mainThreadHandle_, 1))
         URHO3D_LOGWARNING("TerminateProcess() failed");
-    
+
     CloseHandle(mainThreadHandle_);
     mainThreadHandle_ = nullptr;
 #else

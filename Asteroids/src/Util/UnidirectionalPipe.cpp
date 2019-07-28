@@ -1,8 +1,12 @@
 #include "Asteroids/Util/UnidirectionalPipe.hpp"
-#include <Windows.h>
+
+#if defined(_WIN32)
+#   include <Windows.h>
+#elif defined(__linux__)
+#   include <stdio.h>
+#endif
 
 namespace Asteroids {
-   
 
 // ----------------------------------------------------------------------------
 #if defined(_WIN32)
