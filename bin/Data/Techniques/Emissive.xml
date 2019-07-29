@@ -1,0 +1,7 @@
+<technique vs="Emissive" ps="Emissive" >
+    <pass name="emissive" psdefines="EMISSIVE" depthtest="always" />
+    <pass name="deferred" psdefines="DEFERRED" />
+    <pass name="depth" vs="Depth" ps="Depth" />
+    <pass name="shadow" vs="Shadow" ps="Shadow" />
+</technique>
+

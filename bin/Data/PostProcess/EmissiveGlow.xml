@@ -1,0 +1,51 @@
+<renderpath>
+    <rendertarget name="emissivetarget" tag="EmissiveGlow" sizedivisor="1 1" format="rgb" />
+    <rendertarget name="ds2" tag="EmissiveGlow" sizedivisor="2 2" format="rgba16f" filter="true" />
+    <rendertarget name="ds4" tag="EmissiveGlow" sizedivisor="4 4" format="rgba16f" filter="true" />
+    <rendertarget name="ds8" tag="EmissiveGlow" sizedivisor="8 8" format="rgba16f" filter="true" />
+    <rendertarget name="ds16" tag="EmissiveGlow" sizedivisor="16 16" format="rgba16f" filter="true" />
+    <rendertarget name="blur" tag="EmissiveGlow" sizedivisor="4 4" format="rgba16f" filter="true" />
+
+    <!-- Render only objects that have the "emissive" technique -->
+    <command type="clear" color="0 0 0 0" output="emissivetarget" />
+    <command type="scenepass" tag="EmissiveGlow" pass="emissive" output="emissivetarget" />
+
+    <!-- Downsample emissive result -->
+    <command type="quad" tag="EmissiveGlow" vs="CopyFramebuffer" ps="CopyFramebuffer" output="ds2">
+        <texture unit="diffuse" name="emissivetarget" />
+    </command>
+    <command type="quad" tag="EmissiveGlow" vs="CopyFramebuffer" ps="CopyFramebuffer" output="ds4">
+        <texture unit="diffuse" name="ds2" />
+    </command>
+    <command type="quad" tag="EmissiveGlow" vs="CopyFramebuffer" ps="CopyFramebuffer" output="ds8">
+        <texture unit="diffuse" name="ds4" />
+    </command>
+    <command type="quad" tag="EmissiveGlow" vs="CopyFramebuffer" ps="CopyFramebuffer" output="ds16">
+        <texture unit="diffuse" name="ds8" />
+    </command>
+
+    <command type="quad" tag="EmissiveGlow" vs="Emissive" ps="Emissive" psdefines="BLURH" output="blur">
+        <texture unit="diffuse" name="ds16" />
+    </command>
+    <command type="quad" tag="EmissiveGlow" vs="Emissive" ps="Emissive" psdefines="BLURV" output="ds16">
+        <texture unit="diffuse" name="blur" />
+    </command>
+
+    <!-- Upsample blurred result -->
+    <command type="quad" tag="EmissiveGlow" vs="CopyFramebuffer" ps="CopyFramebuffer" output="ds8">
+        <texture unit="diffuse" name="ds16" />
+    </command>
+    <command type="quad" tag="EmissiveGlow" vs="CopyFramebuffer" ps="CopyFramebuffer" output="ds4">
+        <texture unit="diffuse" name="ds8" />
+    </command>
+    <command type="quad" tag="EmissiveGlow" vs="CopyFramebuffer" ps="CopyFramebuffer" output="ds2">
+        <texture unit="diffuse" name="ds4" />
+    </command>
+
+    <command type="quad" tag="EmissiveGlow" vs="Emissive" ps="Emissive" psdefines="COMBINE" output="viewport">
+        <parameter name="EmissiveGlowMix" value="1.0 2" />
+        <texture unit="diffuse" name="viewport" />
+        <texture unit="normal" name="ds2" />
+    </command>
+</renderpath>
+

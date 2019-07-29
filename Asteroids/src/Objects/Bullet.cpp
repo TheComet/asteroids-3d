@@ -34,7 +34,7 @@ Bullet* Bullet::Create(Scene* scene, Quaternion pivotRotation, float angle)
 
     StaticModel* bulletModel = modelNode->CreateComponent<StaticModel>();
     bulletModel->SetModel(cache->GetResource<Model>("Models/JackieProjectile.mdl"));
-    bulletModel->SetMaterial(cache->GetResource<Material>("Materials/DefaultGrey.xml"));
+    bulletModel->SetMaterial(cache->GetResource<Material>("Materials/Bullet.xml"));
 
     Bullet* bullet = modelNode->CreateComponent<Bullet>(LOCAL);
     bullet->SetLife(0.8);

@@ -8,6 +8,8 @@ namespace Urho3D {
     class DebugHud;
     class Scene;
     class Node;
+    class Viewport;
+    class XMLFile;
 }
 
 namespace Asteroids {
@@ -28,6 +30,7 @@ private:
     void CreateDebugHud();
     void ParseArgs();
 
+    void HandleFileChanged(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleConnectPromptRequestConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleConnectPromptRequestCancel(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleHostServerPromptRequestConnect(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
@@ -43,6 +46,8 @@ private:
     Urho3D::SharedPtr<Urho3D::Scene> scene_;
     Urho3D::SharedPtr<Urho3D::DebugHud> debugHud_;
     Urho3D::SharedPtr<Urho3D::Node> cameraNode_;
+    Urho3D::SharedPtr<Urho3D::Viewport> viewport_;
+    Urho3D::Vector<Urho3D::SharedPtr<Urho3D::XMLFile>> renderPathConfigs_;
     Urho3D::HashMap<User::GUID, Urho3D::Node*> shipNodes_;
     bool drawPhyGeometry_;
     User::GUID myGuid_;

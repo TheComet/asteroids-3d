@@ -19,9 +19,11 @@
 #include <Urho3D/Engine/EngineDefs.h>
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Graphics/DebugRenderer.h>
+#include <Urho3D/Graphics/Graphics.h>
 #include <Urho3D/Graphics/Model.h>
 #include <Urho3D/Graphics/Octree.h>
 #include <Urho3D/Graphics/Renderer.h>
+#include <Urho3D/Graphics/RenderPath.h>
 #include <Urho3D/Graphics/StaticModel.h>
 #include <Urho3D/Graphics/Viewport.h>
 #include <Urho3D/Input/Input.h>
@@ -31,6 +33,7 @@
 #include <Urho3D/Physics/CollisionShape.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
 #include <Urho3D/Physics/RigidBody.h>
+#include <Urho3D/Resource/ResourceEvents.h>
 #include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/Scene/Scene.h>
@@ -109,9 +112,31 @@ void ClientApplication::Start()
     cameraController->SetConfig(cache->GetResource<XMLFile>("Config/Camera.xml"));
 
     Renderer* renderer = GetSubsystem<Renderer>();
-    Viewport* viewport = new Viewport(context_, scene_, camera);
-    viewport->SetDrawDebug(true);
-    renderer->SetViewport(0, viewport);
+    viewport_ = new Viewport(context_, scene_, camera);
+#if defined(DEBUG)
+    viewport_->SetDrawDebug(true);
+#endif
+    renderer->SetViewport(0, viewport_);
+
+    // Load render path configurations
+    SharedPtr<XMLFile> baseRenderPath;
+    if (GetSubsystem<Graphics>()->GetReadableDepthSupport())
+        baseRenderPath = cache->GetResource<XMLFile>("RenderPaths/AsteroidsDeferredHWDepth.xml");
+    else
+    {
+        URHO3D_LOGWARNING("No HW depth support");
+        baseRenderPath = cache->GetResource<XMLFile>("RenderPaths/AsteroidsDeferred.xml");
+    }
+    SharedPtr<XMLFile> emissiveGlow(cache->GetResource<XMLFile>("PostProcess/EmissiveGlow.xml"));
+    SharedPtr<XMLFile> fxaa3(cache->GetResource<XMLFile>("PostProcess/FXAA3.xml"));
+    renderPathConfigs_.Push(baseRenderPath);
+    renderPathConfigs_.Push(fxaa3);
+    renderPathConfigs_.Push(emissiveGlow);
+
+    RenderPath* renderPath = new RenderPath;
+    for (const auto& config : renderPathConfigs_)
+        renderPath->Append(config);
+    viewport_->SetRenderPath(renderPath);
 
     SubscribeToEvents();
 
@@ -171,6 +196,7 @@ void ClientApplication::CreateDebugHud()
 // ----------------------------------------------------------------------------
 void ClientApplication::SubscribeToEvents()
 {
+    SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER(ClientApplication, HandleFileChanged));
     SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(ClientApplication, HandleKeyDown));
     SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(ClientApplication, HandlePostRenderUpdate));
     SubscribeToEvent(E_MAINMENUQUIT, URHO3D_HANDLER(ClientApplication, HandleMainMenuQuit));
@@ -181,6 +207,22 @@ void ClientApplication::SubscribeToEvents()
     SubscribeToEvent(E_PLAYERCREATE, URHO3D_HANDLER(ClientApplication, HandlePlayerCreate));
     SubscribeToEvent(E_PLAYERDESTROY, URHO3D_HANDLER(ClientApplication, HandlePlayerDestroy));
     SubscribeToEvent(E_REGISTERSUCCEEDED, URHO3D_HANDLER(ClientApplication, HandleRegisterSucceeded));
+}
+
+// ----------------------------------------------------------------------------
+void ClientApplication::HandleFileChanged(StringHash eventType, VariantMap& eventData)
+{
+    using namespace FileChanged;
+
+    for (const auto& config : renderPathConfigs_)
+        if (config.NotNull() && config->GetName() == eventData[P_RESOURCENAME].GetString())
+        {
+            RenderPath* renderPath = new RenderPath;
+            for (const auto& config : renderPathConfigs_)
+                renderPath->Append(config);
+            viewport_->SetRenderPath(renderPath);
+            break;
+        }
 }
 
 // ----------------------------------------------------------------------------
