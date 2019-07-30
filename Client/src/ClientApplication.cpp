@@ -28,6 +28,7 @@
 #include <Urho3D/Graphics/Viewport.h>
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/Input/InputEvents.h>
+#include <Urho3D/IO/Log.h>
 #include <Urho3D/Network/Network.h>
 #include <Urho3D/Network/NetworkEvents.h>
 #include <Urho3D/Physics/CollisionShape.h>
