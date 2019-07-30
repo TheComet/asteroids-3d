@@ -19,7 +19,6 @@ public:
 
     float GetOffsetFromPlanetCenter() const;
 
-protected:
     void UpdatePosition(const Urho3D::Vector2& localLinearVelocity, float dt);
     void UpdatePlanetHeight();
 

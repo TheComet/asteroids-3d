@@ -10,8 +10,9 @@
 #include "Asteroids/Player/PlayerEvents.hpp"
 #include "Asteroids/Player/ServerShipState.hpp"
 #include "Asteroids/Player/ShipController.hpp"
+#include "Asteroids/Player/WeaponSpawner.hpp"
 #include "Asteroids/Objects/Asteroid.hpp"
-#include "Asteroids/Objects/Bullet.hpp"
+#include "Asteroids/Objects/BulletController.hpp"
 #include "Asteroids/UserRegistry/UserRegistryEvents.hpp"
 
 #include <Urho3D/Core/Context.h>
@@ -28,9 +29,9 @@ void RegisterObjectFactories(Context* context)
 {
     // TODO convert these to static methods
     context->RegisterFactory<Asteroid>(ASTEROIDS_CATEGORY);
-    context->RegisterFactory<Bullet>(ASTEROIDS_CATEGORY);
 
     ActionState::RegisterObject(context);
+    BulletController::RegisterObject(context);
     ClientLocalShipState::RegisterObject(context);
     ClientRemoteShipState::RegisterObject(context);
     ConnectPrompt::RegisterObject(context);
@@ -40,6 +41,7 @@ void RegisterObjectFactories(Context* context)
     OrbitingCameraController::RegisterObject(context);
     ServerShipState::RegisterObject(context);
     ShipController::RegisterObject(context);
+    WeaponSpawner::RegisterObject(context);
 }
 
 // ----------------------------------------------------------------------------

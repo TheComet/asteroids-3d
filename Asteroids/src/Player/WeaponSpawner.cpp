@@ -1,0 +1,153 @@
+#include "Asteroids/AsteroidsLib.hpp"
+#include "Asteroids/Objects/BulletController.hpp"
+#include "Asteroids/Player/ActionState.hpp"
+#include "Asteroids/Player/ActionStateEvents.hpp"
+#include "Asteroids/Player/ShipController.hpp"
+#include "Asteroids/Player/WeaponSpawner.hpp"
+
+#include <Urho3D/Core/Context.h>
+#include <Urho3D/Core/CoreEvents.h>
+#include <Urho3D/IO/Log.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Resource/ResourceEvents.h>
+#include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/Resource/XMLElement.h>
+#include <Urho3D/Scene/Node.h>
+#include <Urho3D/Scene/Scene.h>
+
+using namespace Urho3D;
+
+namespace Asteroids {
+
+// ----------------------------------------------------------------------------
+WeaponSpawner::WeaponSpawner(Context* context) :
+    Component(context),
+    fireActionCooldown_(0)
+{
+    configXML_ = GetSubsystem<ResourceCache>()->GetResource<XMLFile>("Config/WeaponSpawner.xml");
+    ParseConfig();
+
+    SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(WeaponSpawner, HandleUpdate));
+    SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER(WeaponSpawner, HandleFileChanged));
+}
+
+// ----------------------------------------------------------------------------
+void WeaponSpawner::RegisterObject(Context* context)
+{
+    context->RegisterFactory<WeaponSpawner>(ASTEROIDS_CATEGORY);
+}
+
+// ----------------------------------------------------------------------------
+void WeaponSpawner::CreateBullet()
+{
+    // Load bullet prefab
+    ResourceCache* cache = GetSubsystem<ResourceCache>();
+    Node* bullet = GetScene()->CreateChild();
+    XMLFile* bulletXML = cache->GetResource<XMLFile>("Prefabs/Bullet.xml");
+    bullet->LoadXML(bulletXML->GetRoot());
+
+    // Calculate the effective bullet direction, which is a combination of the
+    // player's angle and player's speed
+    ShipController* shipController = GetComponent<ShipController>();
+    Vector2 bulletStandingVelocity(Sin(shipController->GetAngle()) * config_.bullet.speed, Cos(shipController->GetAngle()) * config_.bullet.speed);
+    Vector2 bulletVelocity = bulletStandingVelocity + shipController->GetVelocity();
+
+    // Set up bullet controller with the correct speed/life parameters.
+    // Ship controller should always exist if weapon spawner exists.
+    BulletController* bulletController = bullet->GetChild("Bullet")->GetComponent<BulletController>();
+    bulletController->SetLife(config_.bullet.life);
+    bulletController->SetVelocity(bulletVelocity);
+
+    // Set initial bullet location to the tip of the player's ship
+    // Note: Have to update planet height before moving the bullet, as
+    // UpdatePosition takes into account the planet's radius
+    bullet->SetRotation(node_->GetParent()->GetRotation());
+    bulletController->UpdatePlanetHeight();
+    bulletController->UpdatePosition(bulletController->GetVelocity().Normalized(), config_.bullet.initialOffset);
+}
+
+// ----------------------------------------------------------------------------
+void WeaponSpawner::ParseConfig()
+{
+    if (configXML_ == nullptr)
+        return;
+
+    XMLElement root = configXML_->GetRoot();
+    XMLElement bullet = root.GetChild("bullet");
+    for (XMLElement param = bullet.GetChild("param"); param; param = param.GetNext("param"))
+    {
+        String name = param.GetAttribute("name");
+        if      (name == "speed")         config_.bullet.speed = param.GetFloat("value");
+        else if (name == "life")          config_.bullet.life = param.GetFloat("value");
+        else if (name == "cooldown")      config_.bullet.cooldown = param.GetFloat("value");
+        else if (name == "initialOffset") config_.bullet.initialOffset = param.GetFloat("value");
+        else
+        {
+            URHO3D_LOGERRORF("Unknown parameter \"%s\" while reading config file \"%s\"", name.CString(), configXML_->GetName().CString());
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+bool WeaponSpawner::TryGetActionState()
+{
+    if (state_.NotNull())
+    {
+        UnsubscribeFromEvent(E_ACTIONWARP);
+        UnsubscribeFromEvent(E_ACTIONUSEITEM);
+        state_ = nullptr;
+    }
+
+    state_ = GetComponent<ActionState>();
+
+    if (state_.NotNull())
+    {
+        SubscribeToEvent(state_, E_ACTIONWARP, URHO3D_HANDLER(WeaponSpawner, HandleActionWarp));
+        SubscribeToEvent(state_, E_ACTIONUSEITEM, URHO3D_HANDLER(WeaponSpawner, HandleActionUseItem));
+    }
+
+    return state_.Expired();
+}
+
+// ----------------------------------------------------------------------------
+void WeaponSpawner::HandleUpdate(StringHash eventType, VariantMap& eventData)
+{
+    using namespace Update;
+
+    float dt = eventData[P_TIMESTEP].GetFloat();
+
+    if (state_.Expired() && TryGetActionState() == false)
+        return;
+
+    fireActionCooldown_ = Max(0.0, fireActionCooldown_ - dt);
+    if (fireActionCooldown_ == 0.0 && state_->IsFiring())
+    {
+        fireActionCooldown_ = config_.bullet.cooldown;
+        CreateBullet();
+    }
+}
+
+// ----------------------------------------------------------------------------
+void WeaponSpawner::HandleActionWarp(StringHash eventType, VariantMap& eventData)
+{
+    URHO3D_LOGDEBUG("Warp action");
+}
+
+// ----------------------------------------------------------------------------
+void WeaponSpawner::HandleActionUseItem(StringHash eventType, VariantMap& eventData)
+{
+    URHO3D_LOGDEBUG("UseItem action");
+}
+
+// ----------------------------------------------------------------------------
+void WeaponSpawner::HandleFileChanged(StringHash eventType, VariantMap& eventData)
+{
+    using namespace FileChanged;
+
+    if (configXML_ && configXML_->GetName() == eventData[P_RESOURCENAME].GetString())
+    {
+        ParseConfig();
+    }
+}
+
+}

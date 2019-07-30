@@ -122,7 +122,7 @@ void ServerApplication::LoadScene()
     scene_->CreateComponent<Octree>(LOCAL);
     scene_->CreateComponent<PhysicsWorld>(LOCAL);
 
-    planet_ = scene_->CreateChild("Planet");
+    planet_ = scene_->CreateChild();
     planetXML_ = cache->GetResource<XMLFile>("Prefabs/ShizzlePlanet.xml");
     planet_->LoadXML(planetXML_->GetRoot());
 }

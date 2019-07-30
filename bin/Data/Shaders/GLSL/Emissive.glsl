@@ -10,7 +10,7 @@ varying vec2 vScreenPos;
 
 #ifdef COMPILEPS
 uniform vec2 cblurInvSize;
-const float cBlurRadius = 2;
+const float cBlurRadius = 4;
 #endif
 
 #ifdef COMBINE

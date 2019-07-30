@@ -1,0 +1,9 @@
+<weaponspawner>
+    <bullet>
+        <param name="speed" value="600" />
+        <param name="life" value="1.2" />
+        <param name="cooldown" value="0.2" />
+        <param name="initialOffset" value="8" />
+    </bullet>
+</weaponspawner>
+

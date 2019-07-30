@@ -1,9 +1,7 @@
 #include "Asteroids/AsteroidsLib.hpp"
-#include "Asteroids/Objects/Bullet.hpp"
 #include "Asteroids/Globals.hpp"
 #include "Asteroids/Player/ShipController.hpp"
 #include "Asteroids/Player/ActionState.hpp"
-#include "Asteroids/Player/ActionStateEvents.hpp"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/CoreEvents.h>
@@ -26,8 +24,7 @@ namespace Asteroids {
 ShipController::ShipController(Context* context) :
     SurfaceObject(context),
     shipConfig_({0, 0, 0, 0}),
-    angle_(0),
-    fireActionCooldown_(0)
+    angle_(0)
 {
 }
 
@@ -84,6 +81,12 @@ void ShipController::SetAngle(float angle)
 }
 
 // ----------------------------------------------------------------------------
+const Vector2& ShipController::GetVelocity() const
+{
+    return velocity_;
+}
+
+// ----------------------------------------------------------------------------
 void ShipController::ParseShipConfig()
 {
     XMLElement ship = configFile_->GetRoot();
@@ -102,43 +105,22 @@ void ShipController::ParseShipConfig()
 }
 
 // ----------------------------------------------------------------------------
-bool ShipController::TryGetActionState()
-{
-    if (state_.NotNull())
-    {
-        UnsubscribeFromEvent(E_ACTIONWARP);
-        UnsubscribeFromEvent(E_ACTIONUSEITEM);
-        state_ = nullptr;
-    }
-
-    state_ = GetComponent<ActionState>();
-
-    if (state_.NotNull())
-    {
-        SubscribeToEvent(state_, E_ACTIONWARP, URHO3D_HANDLER(ShipController, HandleActionWarp));
-        SubscribeToEvent(state_, E_ACTIONUSEITEM, URHO3D_HANDLER(ShipController, HandleActionUseItem));
-    }
-
-    return state_.Expired();
-}
-
-// ----------------------------------------------------------------------------
 void ShipController::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
     using namespace Update;
 
     float dt = eventData[P_TIMESTEP].GetFloat();
-
-    if (state_.Expired() && TryGetActionState() == false)
+    ActionState* state = GetComponent<ActionState>();
+    if (state == nullptr)
         return;
 
     // Update Y rotation of player model depending on left/right input
-    angle_ += (state_->GetRight() - state_->GetLeft()) * shipConfig_.rotationSpeed_ * dt;
+    angle_ += (state->GetRight() - state->GetLeft()) * shipConfig_.rotationSpeed_ * dt;
     if (angle_ > 360) angle_ -= 360;
     if (angle_ < 0) angle_ += 360;
     node_->SetRotation(Quaternion(0, angle_, 0));
 
-    if (state_->IsThrusting())
+    if (state->IsThrusting())
     {
         // Update player speed
         velocity_.x_ += Sin(angle_) * shipConfig_.acceleration_ * dt;
@@ -160,28 +142,9 @@ void ShipController::HandleUpdate(StringHash eventType, VariantMap& eventData)
         velocity_.y_ -= Sin(angleOfTrajectory) * decay;
     }
 
-    fireActionCooldown_ = Max(0.0, fireActionCooldown_ - dt);
-    if (fireActionCooldown_ == 0.0 && state_->IsFiring())
-    {
-        fireActionCooldown_ = 0.2;
-        Bullet::Create(GetScene(), node_->GetParent()->GetRotation(), angle_);
-    }
-
     UpdatePosition(velocity_, dt);
     UpdatePlanetHeight();
     node_->SetPosition(Vector3(0, GetOffsetFromPlanetCenter(), 0));
-}
-
-// ----------------------------------------------------------------------------
-void ShipController::HandleActionWarp(StringHash eventType, VariantMap& eventData)
-{
-    URHO3D_LOGDEBUG("Warp action");
-}
-
-// ----------------------------------------------------------------------------
-void ShipController::HandleActionUseItem(StringHash eventType, VariantMap& eventData)
-{
-    URHO3D_LOGDEBUG("UseItem action");
 }
 
 // ----------------------------------------------------------------------------

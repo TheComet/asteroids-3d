@@ -29,13 +29,12 @@ public:
     float GetAngle() const;
     void SetAngle(float angle);
 
+    const Urho3D::Vector2& GetVelocity() const;
+
 private:
     void SubscribeToEvents();
     void ParseShipConfig();
-    bool TryGetActionState();
     void HandleUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleActionWarp(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
-    void HandleActionUseItem(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleFileChanged(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 
 private:
@@ -49,10 +48,8 @@ private:
     } shipConfig_;
 
     Urho3D::SharedPtr<Urho3D::XMLFile> configFile_;
-    Urho3D::WeakPtr<ActionState> state_;
     Urho3D::Vector2 velocity_;
     float angle_;
-    float fireActionCooldown_;
 };
 
 }

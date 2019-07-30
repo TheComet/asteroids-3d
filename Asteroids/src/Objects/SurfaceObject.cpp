@@ -29,8 +29,8 @@ float SurfaceObject::GetOffsetFromPlanetCenter() const
 void SurfaceObject::UpdatePosition(const Vector2& localLinearVelocity, float dt)
 {
     Node* pivot = node_->GetParent();
-    Quaternion xrot(localLinearVelocity.y_ / planetHeight_ * dt, Vector3::RIGHT);
-    Quaternion zrot(localLinearVelocity.x_ / planetHeight_ * dt, Vector3::BACK);
+    Quaternion xrot(2 * M_PI * localLinearVelocity.y_ / planetHeight_ * dt, Vector3::RIGHT);
+    Quaternion zrot(2 * M_PI * localLinearVelocity.x_ / planetHeight_ * dt, Vector3::BACK);
     pivot->Rotate(xrot * zrot);
 }
 
