@@ -5,6 +5,11 @@
         <param name="cooldown" value="0.2" />
         <param name="initialOffset" value="8" />
     </bullet>
+    <bulletspread>
+        <param name="spread" value="8" />
+        <param name="count" value="5" />
+        <param name="cooldown" value="0.8" />
+    </bulletspread>
     <mine>
         <param name="ejectSpeed" value="160" />
         <param name="deceleration" value="3" />

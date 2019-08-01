@@ -39,7 +39,7 @@ void WeaponSpawner::RegisterObject(Context* context)
 }
 
 // ----------------------------------------------------------------------------
-void WeaponSpawner::CreateBullet()
+void WeaponSpawner::CreateBullet(float angleOffset)
 {
     // Load bullet prefab
     ResourceCache* cache = GetSubsystem<ResourceCache>();
@@ -50,7 +50,7 @@ void WeaponSpawner::CreateBullet()
     // Calculate the effective bullet direction, which is a combination of the
     // player's angle and player's speed
     ShipController* shipController = GetComponent<ShipController>();
-    Vector2 bulletStandingVelocity(Sin(shipController->GetAngle()) * config_.bullet.speed, Cos(shipController->GetAngle()) * config_.bullet.speed);
+    Vector2 bulletStandingVelocity(Sin(shipController->GetAngle() + angleOffset) * config_.bullet.speed, Cos(shipController->GetAngle() + angleOffset) * config_.bullet.speed);
     Vector2 bulletVelocity = bulletStandingVelocity + shipController->GetVelocity();
 
     // Set up bullet controller with the correct speed/life parameters.
@@ -65,6 +65,15 @@ void WeaponSpawner::CreateBullet()
     bullet->SetRotation(node_->GetParent()->GetRotation());
     bulletController->UpdatePlanetHeight();
     bulletController->UpdatePosition(bulletController->GetVelocity().Normalized(), config_.bullet.initialOffset);
+}
+
+// ----------------------------------------------------------------------------
+void WeaponSpawner::CreateBulletSpread()
+{
+    float angle = -config_.bulletSpread.spread / 2;
+    float incr = config_.bulletSpread.spread / (config_.bulletSpread.count - 1);
+    for (int i = 0; i != config_.bulletSpread.count; ++i, angle += incr)
+        CreateBullet(angle);
 }
 
 // ----------------------------------------------------------------------------
@@ -118,6 +127,19 @@ void WeaponSpawner::ParseConfig()
         }
     }
 
+    XMLElement bulletSpread = root.GetChild("bulletspread");
+    for (XMLElement param = bulletSpread.GetChild("param"); param; param = param.GetNext("param"))
+    {
+        String name = param.GetAttribute("name");
+        if      (name == "spread")   config_.bulletSpread.spread = param.GetFloat("value");
+        else if (name == "count")    config_.bulletSpread.count = Max(2, param.GetInt("value"));
+        else if (name == "cooldown") config_.bulletSpread.cooldown = param.GetFloat("value");
+        else
+        {
+            URHO3D_LOGERRORF("Unknown parameter mine \"%s\" while reading config file \"%s\"", name.CString(), configXML_->GetName().CString());
+        }
+    }
+
     XMLElement mine = root.GetChild("mine");
     for (XMLElement param = mine.GetChild("param"); param; param = param.GetNext("param"))
     {
@@ -168,8 +190,8 @@ void WeaponSpawner::HandleUpdate(StringHash eventType, VariantMap& eventData)
     fireActionCooldown_ = Max(0.0, fireActionCooldown_ - dt);
     if (fireActionCooldown_ == 0.0 && state_->IsFiring())
     {
-        fireActionCooldown_ = config_.bullet.cooldown;
-        CreateBullet();
+        fireActionCooldown_ = config_.bulletSpread.cooldown;
+        CreateBulletSpread();
     }
 }
 
