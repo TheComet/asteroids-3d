@@ -4,6 +4,7 @@
 
 namespace Urho3D {
     class Context;
+    class RenderPath;
 }
 
 namespace Asteroids {
@@ -26,5 +27,10 @@ ASTEROIDS_PUBLIC_API void RegisterObjectFactories(Urho3D::Context* context);
  * network.
  */
 ASTEROIDS_PUBLIC_API void RegisterRemoteNetworkEvents(Urho3D::Context* context);
+
+/*!
+ * @brief Loads the custom renderpath and returns it.
+ */
+ASTEROIDS_PUBLIC_API Urho3D::RenderPath* LoadRenderPath(Urho3D::Context* context);
 
 }

@@ -21,6 +21,7 @@ define_source_files (
         "src/Menu/MenuScreen.cpp"
         "src/Objects/Asteroid.cpp"
         "src/Objects/BulletController.cpp"
+        "src/Objects/MineController.cpp"
         "src/Objects/SurfaceObject.cpp"
         "src/Player/OrbitingCameraController.cpp"
         "src/Player/ActionState.cpp"

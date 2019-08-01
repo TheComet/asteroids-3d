@@ -136,7 +136,7 @@ void ShipController::HandleUpdate(StringHash eventType, VariantMap& eventData)
         // Velocity decays over time
         float vlength = velocity_.Length();
         float decay = vlength * dt * shipConfig_.velocityDecay_;
-        decay = Clamp(decay, -vlength, vlength);  // In case of very large timesteps
+        decay = Min(decay, vlength);  // In case of very large timesteps
         float angleOfTrajectory = Atan2(velocity_.y_, velocity_.x_);
         velocity_.x_ -= Cos(angleOfTrajectory) * decay;
         velocity_.y_ -= Sin(angleOfTrajectory) * decay;

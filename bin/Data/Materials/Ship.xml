@@ -1,5 +1,5 @@
 <material>
     <technique name="Techniques/Emissive.xml" />
-    <parameter name="MatDiffColor" value="1 0.5 1 1" />
-    <parameter name="MatEmissiveColor" value="1 0.5 1" />
+    <parameter name="MatDiffColor" value="1 1 1 1" />
+    <parameter name="MatEmissiveColor" value="0.9 1 1" />
 </material>

@@ -16,6 +16,7 @@ public:
     static void RegisterObject(Urho3D::Context* context);
 
     void CreateBullet();
+    void CreateMine();
 
 private:
     void ParseConfig();
@@ -35,6 +36,14 @@ private:
             float cooldown = 0;
             float initialOffset = 0;
         } bullet;
+        struct
+        {
+            float ejectSpeed = 0;
+            float deceleration = 0;
+            float life = 0;
+            float cooldown = 0;
+            float initialOffset = 0;
+        } mine;
     } config_;
 
     Urho3D::WeakPtr<ActionState> state_;

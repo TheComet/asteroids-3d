@@ -5,5 +5,12 @@
         <param name="cooldown" value="0.2" />
         <param name="initialOffset" value="8" />
     </bullet>
+    <mine>
+        <param name="ejectSpeed" value="160" />
+        <param name="deceleration" value="3" />
+        <param name="life" value="30" />
+        <param name="cooldown" value="2" />
+        <param name="initialOffset" value="8" />
+    </mine>
 </weaponspawner>
 

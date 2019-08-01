@@ -119,25 +119,7 @@ void ClientApplication::Start()
 #endif
     renderer->SetViewport(0, viewport_);
 
-    // Load render path configurations
-    SharedPtr<XMLFile> baseRenderPath;
-    if (GetSubsystem<Graphics>()->GetReadableDepthSupport())
-        baseRenderPath = cache->GetResource<XMLFile>("RenderPaths/AsteroidsDeferredHWDepth.xml");
-    else
-    {
-        URHO3D_LOGWARNING("No HW depth support");
-        baseRenderPath = cache->GetResource<XMLFile>("RenderPaths/AsteroidsDeferred.xml");
-    }
-    SharedPtr<XMLFile> emissiveGlow(cache->GetResource<XMLFile>("PostProcess/EmissiveGlow.xml"));
-    SharedPtr<XMLFile> fxaa3(cache->GetResource<XMLFile>("PostProcess/FXAA3.xml"));
-    renderPathConfigs_.Push(baseRenderPath);
-    renderPathConfigs_.Push(fxaa3);
-    renderPathConfigs_.Push(emissiveGlow);
-
-    RenderPath* renderPath = new RenderPath;
-    for (const auto& config : renderPathConfigs_)
-        renderPath->Append(config);
-    viewport_->SetRenderPath(renderPath);
+    viewport_->SetRenderPath(LoadRenderPath(context_));
 
     SubscribeToEvents();
 
@@ -197,7 +179,6 @@ void ClientApplication::CreateDebugHud()
 // ----------------------------------------------------------------------------
 void ClientApplication::SubscribeToEvents()
 {
-    SubscribeToEvent(E_FILECHANGED, URHO3D_HANDLER(ClientApplication, HandleFileChanged));
     SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(ClientApplication, HandleKeyDown));
     SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(ClientApplication, HandlePostRenderUpdate));
     SubscribeToEvent(E_MAINMENUQUIT, URHO3D_HANDLER(ClientApplication, HandleMainMenuQuit));
@@ -208,22 +189,6 @@ void ClientApplication::SubscribeToEvents()
     SubscribeToEvent(E_PLAYERCREATE, URHO3D_HANDLER(ClientApplication, HandlePlayerCreate));
     SubscribeToEvent(E_PLAYERDESTROY, URHO3D_HANDLER(ClientApplication, HandlePlayerDestroy));
     SubscribeToEvent(E_REGISTERSUCCEEDED, URHO3D_HANDLER(ClientApplication, HandleRegisterSucceeded));
-}
-
-// ----------------------------------------------------------------------------
-void ClientApplication::HandleFileChanged(StringHash eventType, VariantMap& eventData)
-{
-    using namespace FileChanged;
-
-    for (const auto& config : renderPathConfigs_)
-        if (config.NotNull() && config->GetName() == eventData[P_RESOURCENAME].GetString())
-        {
-            RenderPath* renderPath = new RenderPath;
-            for (const auto& config : renderPathConfigs_)
-                renderPath->Append(config);
-            viewport_->SetRenderPath(renderPath);
-            break;
-        }
 }
 
 // ----------------------------------------------------------------------------

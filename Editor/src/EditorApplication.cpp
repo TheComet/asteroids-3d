@@ -3,8 +3,8 @@
 
 #include <Urho3D/AngelScript/Script.h>
 #include <Urho3D/AngelScript/ScriptFile.h>
-#include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/EngineDefs.h>
+#include <Urho3D/Graphics/Renderer.h>
 #include <Urho3D/Resource/ResourceCache.h>
 
 using namespace Urho3D;
@@ -31,9 +31,13 @@ void EditorApplication::Setup()
 // ----------------------------------------------------------------------------
 void EditorApplication::Start()
 {
+    // Register Asteroids specific components
     RegisterObjectFactories(context_);
-    context_->RegisterSubsystem<Script>();
+    // Set Asteroids specific render path
+    GetSubsystem<Renderer>()->SetDefaultRenderPath(LoadRenderPath(context_));
 
+    // Start editor
+    context_->RegisterSubsystem<Script>();
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     script_ = cache->GetResource<ScriptFile>("Scripts/Editor.as");
     if (!script_ || !script_->Execute("void Start()"))
