@@ -24,10 +24,10 @@
         <texture unit="diffuse" name="ds8" />
     </command>
 
-    <command type="quad" tag="EmissiveGlow" vs="Emissive" ps="Emissive" psdefines="BLURH" output="blur">
+    <command type="quad" tag="EmissiveGlow" vs="EmissiveGlow" ps="EmissiveGlow" psdefines="BLURH" output="blur">
         <texture unit="diffuse" name="ds16" />
     </command>
-    <command type="quad" tag="EmissiveGlow" vs="Emissive" ps="Emissive" psdefines="BLURV" output="ds16">
+    <command type="quad" tag="EmissiveGlow" vs="EmissiveGlow" ps="EmissiveGlow" psdefines="BLURV" output="ds16">
         <texture unit="diffuse" name="blur" />
     </command>
 
@@ -42,7 +42,7 @@
         <texture unit="diffuse" name="ds4" />
     </command>
 
-    <command type="quad" tag="EmissiveGlow" vs="Emissive" ps="Emissive" psdefines="COMBINE" output="viewport">
+    <command type="quad" tag="EmissiveGlow" vs="EmissiveGlow" ps="EmissiveGlow" psdefines="COMBINE" output="viewport">
         <parameter name="EmissiveGlowMix" value="1.0 2" />
         <texture unit="diffuse" name="viewport" />
         <texture unit="normal" name="ds2" />

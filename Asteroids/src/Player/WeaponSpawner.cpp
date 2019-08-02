@@ -1,5 +1,5 @@
 #include "Asteroids/AsteroidsLib.hpp"
-#include "Asteroids/Objects/BulletController.hpp"
+#include "Asteroids/Objects/PhaserController.hpp"
 #include "Asteroids/Objects/MineController.hpp"
 #include "Asteroids/Player/ActionState.hpp"
 #include "Asteroids/Player/ActionStateEvents.hpp"
@@ -39,41 +39,41 @@ void WeaponSpawner::RegisterObject(Context* context)
 }
 
 // ----------------------------------------------------------------------------
-void WeaponSpawner::CreateBullet(float angleOffset)
+void WeaponSpawner::CreatePhaser(float angleOffset)
 {
     // Load bullet prefab
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     Node* bullet = GetScene()->CreateChild();
-    XMLFile* bulletXML = cache->GetResource<XMLFile>("Prefabs/Bullet.xml");
+    XMLFile* bulletXML = cache->GetResource<XMLFile>("Prefabs/Phaser.xml");
     bullet->LoadXML(bulletXML->GetRoot());
 
     // Calculate the effective bullet direction, which is a combination of the
     // player's angle and player's speed
     ShipController* shipController = GetComponent<ShipController>();
-    Vector2 bulletStandingVelocity(Sin(shipController->GetAngle() + angleOffset) * config_.bullet.speed, Cos(shipController->GetAngle() + angleOffset) * config_.bullet.speed);
+    Vector2 bulletStandingVelocity(Sin(shipController->GetAngle() + angleOffset) * config_.phaser.speed, Cos(shipController->GetAngle() + angleOffset) * config_.phaser.speed);
     Vector2 bulletVelocity = bulletStandingVelocity + shipController->GetVelocity();
 
     // Set up bullet controller with the correct speed/life parameters.
     // Ship controller should always exist if weapon spawner exists.
-    BulletController* bulletController = bullet->GetChild("Bullet")->GetComponent<BulletController>();
-    bulletController->SetLife(config_.bullet.life);
-    bulletController->SetVelocity(bulletVelocity);
+    PhaserController* phaserController = bullet->GetChild("Phaser")->GetComponent<PhaserController>();
+    phaserController->SetLife(config_.phaser.life);
+    phaserController->SetVelocity(bulletVelocity);
 
     // Set initial bullet location to the tip of the player's ship
     // Note: Have to update planet height before moving the bullet, as
     // UpdatePosition takes into account the planet's radius
     bullet->SetRotation(node_->GetParent()->GetRotation());
-    bulletController->UpdatePlanetHeight();
-    bulletController->UpdatePosition(bulletController->GetVelocity().Normalized(), config_.bullet.initialOffset);
+    phaserController->UpdatePlanetHeight();
+    phaserController->UpdatePosition(phaserController->GetVelocity().Normalized(), config_.phaser.initialOffset);
 }
 
 // ----------------------------------------------------------------------------
-void WeaponSpawner::CreateBulletSpread()
+void WeaponSpawner::CreateSpread()
 {
-    float angle = -config_.bulletSpread.spread / 2;
-    float incr = config_.bulletSpread.spread / (config_.bulletSpread.count - 1);
-    for (int i = 0; i != config_.bulletSpread.count; ++i, angle += incr)
-        CreateBullet(angle);
+    float angle = -config_.spread.spread / 2;
+    float incr = config_.spread.spread / (config_.spread.count - 1);
+    for (int i = 0; i != config_.spread.count; ++i, angle += incr)
+        CreatePhaser(angle);
 }
 
 // ----------------------------------------------------------------------------
@@ -113,31 +113,25 @@ void WeaponSpawner::ParseConfig()
         return;
 
     XMLElement root = configXML_->GetRoot();
-    XMLElement bullet = root.GetChild("bullet");
-    for (XMLElement param = bullet.GetChild("param"); param; param = param.GetNext("param"))
+    XMLElement phaser = root.GetChild("phaser");
+    for (XMLElement param = phaser.GetChild("param"); param; param = param.GetNext("param"))
     {
         String name = param.GetAttribute("name");
-        if      (name == "speed")         config_.bullet.speed = param.GetFloat("value");
-        else if (name == "life")          config_.bullet.life = param.GetFloat("value");
-        else if (name == "cooldown")      config_.bullet.cooldown = param.GetFloat("value");
-        else if (name == "initialOffset") config_.bullet.initialOffset = param.GetFloat("value");
-        else
-        {
-            URHO3D_LOGERRORF("Unknown parameter bullet \"%s\" while reading config file \"%s\"", name.CString(), configXML_->GetName().CString());
-        }
+        if      (name == "speed")         config_.phaser.speed = param.GetFloat("value");
+        else if (name == "life")          config_.phaser.life = param.GetFloat("value");
+        else if (name == "cooldown")      config_.phaser.cooldown = param.GetFloat("value");
+        else if (name == "initialOffset") config_.phaser.initialOffset = param.GetFloat("value");
+        else URHO3D_LOGERRORF("Unknown parameter bullet \"%s\" while reading config file \"%s\"", name.CString(), configXML_->GetName().CString());
     }
 
-    XMLElement bulletSpread = root.GetChild("bulletspread");
+    XMLElement bulletSpread = root.GetChild("spread");
     for (XMLElement param = bulletSpread.GetChild("param"); param; param = param.GetNext("param"))
     {
         String name = param.GetAttribute("name");
-        if      (name == "spread")   config_.bulletSpread.spread = param.GetFloat("value");
-        else if (name == "count")    config_.bulletSpread.count = Max(2, param.GetInt("value"));
-        else if (name == "cooldown") config_.bulletSpread.cooldown = param.GetFloat("value");
-        else
-        {
-            URHO3D_LOGERRORF("Unknown parameter mine \"%s\" while reading config file \"%s\"", name.CString(), configXML_->GetName().CString());
-        }
+        if      (name == "spread")   config_.spread.spread = param.GetFloat("value");
+        else if (name == "count")    config_.spread.count = Max(2, param.GetInt("value"));
+        else if (name == "cooldown") config_.spread.cooldown = param.GetFloat("value");
+        else URHO3D_LOGERRORF("Unknown parameter mine \"%s\" while reading config file \"%s\"", name.CString(), configXML_->GetName().CString());
     }
 
     XMLElement mine = root.GetChild("mine");
@@ -149,10 +143,7 @@ void WeaponSpawner::ParseConfig()
         else if (name == "life")          config_.mine.life = param.GetFloat("value");
         else if (name == "cooldown")      config_.mine.cooldown = param.GetFloat("value");
         else if (name == "initialOffset") config_.mine.initialOffset = param.GetFloat("value");
-        else
-        {
-            URHO3D_LOGERRORF("Unknown parameter mine \"%s\" while reading config file \"%s\"", name.CString(), configXML_->GetName().CString());
-        }
+        else URHO3D_LOGERRORF("Unknown parameter mine \"%s\" while reading config file \"%s\"", name.CString(), configXML_->GetName().CString());
     }
 }
 
@@ -190,8 +181,8 @@ void WeaponSpawner::HandleUpdate(StringHash eventType, VariantMap& eventData)
     fireActionCooldown_ = Max(0.0, fireActionCooldown_ - dt);
     if (fireActionCooldown_ == 0.0 && state_->IsFiring())
     {
-        fireActionCooldown_ = config_.bulletSpread.cooldown;
-        CreateBulletSpread();
+        fireActionCooldown_ = config_.phaser.cooldown;
+        CreatePhaser();
     }
 }
 

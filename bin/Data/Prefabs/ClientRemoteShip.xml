@@ -16,21 +16,11 @@
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="AnimatedModel" id="16777228">
-			<attribute name="Model" value="Model;Models/JackieShip.mdl" />
+			<attribute name="Model" value="Model;Models/PHShip.mdl" />
 			<attribute name="Material" value="Material;Materials/Ship.xml" />
 			<attribute name="Animation States">
 				<variant type="Int" value="0" />
 			</attribute>
-		</component>
-		<component type="CollisionShape" id="16777229">
-			<attribute name="Shape Type" value="Capsule" />
-			<attribute name="Size" value="1.78 3.08 1" />
-			<attribute name="Offset Position" value="0 1.07 0" />
-			<attribute name="Offset Rotation" value="0.707107 0.707107 0 0" />
-		</component>
-		<component type="RigidBody" id="16777230">
-			<attribute name="Physics Position" value="0.011935 0.0301361 0.0986296" />
-			<attribute name="Collision Layer" value="4" />
 		</component>
 		<component type="ClientRemoteShipState" id="16777231" />
 		<component type="ShipController" id="16777232" />

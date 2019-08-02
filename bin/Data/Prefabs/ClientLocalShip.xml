@@ -16,15 +16,17 @@
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="AnimatedModel" id="16777239">
-			<attribute name="Model" value="Model;Models/JackieShip.mdl" />
+			<attribute name="Model" value="Model;Models/PHShip.mdl" />
 			<attribute name="Material" value="Material;Materials/Ship.xml" />
 			<attribute name="Animation States">
 				<variant type="Int" value="0" />
 			</attribute>
 		</component>
 		<component type="CollisionShape" id="16777240">
-			<attribute name="Shape Type" value="TriangleMesh" />
-			<attribute name="Model" value="Model;Models/JackieShip.mdl" />
+			<attribute name="Shape Type" value="Capsule" />
+			<attribute name="Size" value="1.78 3.08 1" />
+			<attribute name="Offset Position" value="0 1.07 0" />
+			<attribute name="Offset Rotation" value="0.707107 0.707107 0 0" />
 		</component>
 		<component type="RigidBody" id="16777241">
 			<attribute name="Physics Position" value="0 1 0" />

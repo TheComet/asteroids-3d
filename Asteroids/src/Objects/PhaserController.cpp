@@ -1,5 +1,5 @@
 #include "Asteroids/AsteroidsLib.hpp"
-#include "Asteroids/Objects/BulletController.hpp"
+#include "Asteroids/Objects/PhaserController.hpp"
 
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Core/CoreEvents.h>
@@ -16,40 +16,40 @@ using namespace Urho3D;
 namespace Asteroids {
 
 // ----------------------------------------------------------------------------
-BulletController::BulletController(Context* context) :
+PhaserController::PhaserController(Context* context) :
     SurfaceObject(context),
     life_(std::numeric_limits<float>::max())
 {
-    SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(BulletController, HandleUpdate));
+    SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(PhaserController, HandleUpdate));
 }
 
 // ----------------------------------------------------------------------------
-void BulletController::RegisterObject(Context* context)
+void PhaserController::RegisterObject(Context* context)
 {
-    context->RegisterFactory<BulletController>(ASTEROIDS_CATEGORY);
+    context->RegisterFactory<PhaserController>(ASTEROIDS_CATEGORY);
 }
 
 // ----------------------------------------------------------------------------
-void BulletController::SetVelocity(const Vector2& velocity)
+void PhaserController::SetVelocity(const Vector2& velocity)
 {
     velocity_ = velocity;
     node_->SetRotation(Quaternion(0, Atan2(velocity.x_, velocity.y_), 0));
 }
 
 // ----------------------------------------------------------------------------
-void BulletController::SetLife(float life)
+void PhaserController::SetLife(float life)
 {
     life_ = life;
 }
 
 // ----------------------------------------------------------------------------
-const Vector2& BulletController::GetVelocity() const
+const Vector2& PhaserController::GetVelocity() const
 {
     return velocity_;
 }
 
 // ----------------------------------------------------------------------------
-void BulletController::HandleUpdate(StringHash eventType, VariantMap& eventData)
+void PhaserController::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
     using namespace Update;
 

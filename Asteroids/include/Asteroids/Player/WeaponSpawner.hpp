@@ -15,8 +15,8 @@ public:
     WeaponSpawner(Urho3D::Context* context);
     static void RegisterObject(Urho3D::Context* context);
 
-    void CreateBullet(float angleOffset=0);
-    void CreateBulletSpread();
+    void CreatePhaser(float angleOffset=0);
+    void CreateSpread();
     void CreateMine();
 
 private:
@@ -36,13 +36,13 @@ private:
             float life = 0;
             float cooldown = 0;
             float initialOffset = 0;
-        } bullet;
+        } phaser;
         struct
         {
             float spread = 0;
             int count = 1;
             float cooldown = 0;
-        } bulletSpread;
+        } spread;
         struct
         {
             float ejectSpeed = 0;

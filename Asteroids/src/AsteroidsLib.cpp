@@ -3,8 +3,8 @@
 #include "Asteroids/Menu/HostServerPrompt.hpp"
 #include "Asteroids/Menu/MainMenu.hpp"
 #include "Asteroids/Objects/Asteroid.hpp"
-#include "Asteroids/Objects/BulletController.hpp"
 #include "Asteroids/Objects/MineController.hpp"
+#include "Asteroids/Objects/PhaserController.hpp"
 #include "Asteroids/Player/ActionState.hpp"
 #include "Asteroids/Player/ClientLocalShipState.hpp"
 #include "Asteroids/Player/ClientRemoteShipState.hpp"
@@ -36,7 +36,6 @@ void RegisterObjectFactories(Context* context)
     context->RegisterFactory<Asteroid>(ASTEROIDS_CATEGORY);
 
     ActionState::RegisterObject(context);
-    BulletController::RegisterObject(context);
     ClientLocalShipState::RegisterObject(context);
     ClientRemoteShipState::RegisterObject(context);
     ConnectPrompt::RegisterObject(context);
@@ -45,6 +44,7 @@ void RegisterObjectFactories(Context* context)
     MainMenu::RegisterObject(context);
     MineController::RegisterObject(context);
     OrbitingCameraController::RegisterObject(context);
+    PhaserController::RegisterObject(context);
     ServerShipState::RegisterObject(context);
     ShipController::RegisterObject(context);
     WeaponSpawner::RegisterObject(context);

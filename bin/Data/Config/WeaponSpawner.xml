@@ -1,15 +1,15 @@
 <weaponspawner>
-    <bullet>
+    <phaser>
         <param name="speed" value="600" />
         <param name="life" value="1.2" />
         <param name="cooldown" value="0.2" />
         <param name="initialOffset" value="8" />
-    </bullet>
-    <bulletspread>
+    </phaser>
+    <spread>
         <param name="spread" value="8" />
         <param name="count" value="5" />
         <param name="cooldown" value="0.8" />
-    </bulletspread>
+    </spread>
     <mine>
         <param name="ejectSpeed" value="160" />
         <param name="deceleration" value="3" />
